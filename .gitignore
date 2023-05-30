@@ -1,0 +1,11 @@
+#ignore all .txt files
+*.txt
+
+#ignore all .xlsx files
+*.xlsx
+
+#ignore all directories with the name .vs
+.vs/
+
+#ignore all .wav files
+*.wav
