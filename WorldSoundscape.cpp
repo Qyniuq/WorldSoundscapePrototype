@@ -80,7 +80,7 @@ void WorldSoundscape::setRandomLocation() {
 	const rapidjson::Value& city = weather.cities[index];
 	const char* city_name = city["name"].GetString();
 	const char* country_code = city["country"].GetString();
-
+	//shared.exclusive_lock()
 	weather.city = city_name;
 	weather.city_input = city_name;
 	weather.whiteSpaceURLManager(weather.city);
@@ -88,6 +88,7 @@ void WorldSoundscape::setRandomLocation() {
 	weather.user_location = false;
 	random_location_update = true;
 	cv3.notify_one();
+	//shared.exclusive_unlock()
 }
 
 void WorldSoundscape::mainMenu(){
@@ -144,12 +145,13 @@ void WorldSoundscape::displayWeather(Weather& weather, std::vector<std::string>&
 		std::mutex mtx;
 	while (!stop_flag) {
 		std::unique_lock<std::mutex> lock(mtx);
+		shmtx.lock(); //shared.lock()
 		system("CLS");
-		while (wait) { std::this_thread::sleep_for(std::chrono::milliseconds(10)); }
 		weather.display();
 		std::cout << "\n";
 		for (auto& n : notes_played)
 			std::cout << n << " ";
+		shmtx.unlock();//shared.unlock()
 		cv.wait_for(lock, std::chrono::milliseconds(1000));
 	}
 }
@@ -162,8 +164,9 @@ void WorldSoundscape::updateWeather(Weather& weather){
 		alEffectf(reverbEffect, AL_EAXREVERB_GAIN, reverbGain);
 		alAuxiliaryEffectSloti(reverbEffectSlot, AL_EFFECTSLOT_EFFECT, reverbEffect);		
 		cv3.wait_for(lock, std::chrono::milliseconds(5000));
-		if(!stop_flag) {
+		if(!stop_flag) {//shared.lock()
 			weather.callAllAPIs();
+			//shared.unlock()
 			if (random_location_update) {
 				cv2.notify_one();
 				random_location_update = false;
@@ -184,9 +187,13 @@ void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::
 		if (notes_played.size() >= 20)
 			notes_played.clear();
 		while (random_location_update) { std::this_thread::sleep_for(std::chrono::milliseconds(10)); }
+		//shared.lock()
 		instrument.sounds[mode[r]].play();
+		std::shared_lock sh_lock(shmtx);
 		std::cout << instrument.sounds[mode[r]].sharp_name << " ";
 		notes_played.push_back(instrument.sounds[mode[r]].sharp_name);
+		sh_lock.unlock();
+		//shared.unlock()
 
 		int sleep_time;
 		if (weather.wind_speed != 0) {
@@ -222,7 +229,7 @@ void WorldSoundscape::keyboard_listener() {
 		case KEY_R:
 		case KEY_r:
 			wait = true;
-			cv.notify_one();
+			cv.notify_all();
 			system("cls");
 			std::cout << "New Random Location..." << std::endl;
 			setRandomLocation();
@@ -232,7 +239,7 @@ void WorldSoundscape::keyboard_listener() {
 		case KEY_l:
 			system("cls");
 			std::cout << "New User Location..." << std::endl;
-			cv.notify_one();
+			cv.notify_all();
 			stop_flag = true;
 			break;
 
@@ -240,16 +247,16 @@ void WorldSoundscape::keyboard_listener() {
 		case KEY_m:
 			system("cls");
 			std::cout << "Back to menu..." << std::endl;
-			cv.notify_one();
+			cv.notify_all();
 			stop_flag = true;
 			break;
 
 		case KEY_X:
 		case KEY_x:
 			system("cls");
-			std::cout << "Exiting programm..." << std::endl;
+			std::cout << "Exiting programm...\nPlease wait..." << std::endl;
 			stop_flag = true;
-			cv.notify_one();
+			cv.notify_all();
 			exit_World_Soundscape = true;
 			value = KEY_X;
 			break;

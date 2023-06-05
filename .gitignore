@@ -9,3 +9,6 @@
 
 #ignore all .wav files
 *.wav
+
+#ignore all directories with the name .x64
+.x64/

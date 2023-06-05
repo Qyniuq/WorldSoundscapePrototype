@@ -9,7 +9,7 @@
 #include <chrono>
 #include <conio.h>
 #include <condition_variable>
-#include <mutex>
+#include <shared_mutex>
 #include <iostream>
 
 #define KEY_R 82
@@ -30,7 +30,7 @@ extern std::atomic<bool> stop_flag;
 class WorldSoundscape
 {
 private:
-	std::mutex mut;
+	std::shared_mutex shmtx;
 	std::atomic<bool> random_location_update{ false };
 	bool wait{ false };
 	std::condition_variable cv;

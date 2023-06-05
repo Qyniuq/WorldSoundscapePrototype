@@ -3,7 +3,7 @@
 
 Weather::Weather(bool user_location, std::string city_input, std::string country_code_input, std::string state_code_input) : user_location{ user_location }, city{ city_input }, state_code{ state_code_input },
 country_code{ country_code_input }, scale{ "none" }, tonality{ "none" }, points {0}, city_input{ city_input }, weather_main{ "none" }, weather_description{ "none" }, temperature{ 0.0 }, feels_like{ 0.0 },
-wind_speed{ 0.0 }, rain_vol{ 0.0 }, snow_vol{ 0.0 }, cloudiness{ 0 }, humidity{ 0 }, visibility{ 0 }, timezone{ 0 }, city_time{ "none" }, open_weather_call_count{ 0 }, sunrise_sunset_call_count{ 0 }, 
+wind_speed{ 0.0 }, rain_vol{ 0.0 }, snow_vol{ 0.0 }, cloudiness{ 0 }, humidity{ 0 }, visibility{ 0 }, timezone {0}, city_time{ "none" }, open_weather_call_count{ 0 }, sunrise_sunset_call_count{ 0 },
 USNO_call_count{ 0 }, geoPLUGIN_call_count{ 0 }, data_wrong{ false }, day_offset{ 0 }, sunrise{ 0, *this }, sunset{ 0, *this }, current_time{ 0, *this }, civil_dawn{ 0, *this }, civil_dusk{ 0, *this },
 nautical_dawn{ 0, *this }, nautical_dusk{ 0, *this }, astronomical_dawn{ 0, *this }, astronomical_dusk{ 0, *this }, solar_noon{ 0, *this }
 {
@@ -67,7 +67,7 @@ void Weather::callAPI(std::string URL, APIs API) {
 
             case APIs::SunriseAndSunset:
                 if (data_is_wrong(day_offset)) {
-                    data_wrong = true;
+                    data_wrong = true; //Sunrise Sunset API does retrieve wrong data with one day offset for some countries on the edges of the timezone (+12/-12UTC);
                 }
                 else {
                     data_wrong = false;
@@ -109,21 +109,29 @@ void Weather::callAllAPIs() {
     time_t day_length = 86400;
     time_t local_time = time(0) + timezone;
 
-    do {
-        int year = getYear(time(0));
-        int month = getMonth(time(0));
-        int day = getDay(local_time);
+    static int previous_timezone{ 0 };
+    static double previous_lat{ 0. };
+    static double previous_lon{ 0. };
+    if (count == 0 || time(0) > end_of_UTC_day || timezone != previous_timezone || abs(lat - previous_lat) > 0.4 || abs(lon - previous_lon) > 0.4) {
+        do {
+            int year = getYear(time(0));
+            int month = getMonth(time(0));
+            int day = getDay(local_time);
 
-        if (day_offset == 1)
-            day = getDay((local_time + day_length));
-        else if (day_offset == -1)
-            day = getDay((local_time - day_length));
+            if (day_offset == 1)
+                day = getDay((local_time + day_length));
+            else if (day_offset == -1)
+                day = getDay((local_time - day_length));
 
-        URL = "https://api.sunrise-sunset.org/json?lat=" + std::to_string(lat) + "&lng=" + std::to_string(lon) + "&formatted=0&date=" + std::to_string(year) + "-" + std::to_string(month) + "-" + std::to_string(day);
-        callAPI(URL, APIs::SunriseAndSunset);
+            URL = "https://api.sunrise-sunset.org/json?lat=" + std::to_string(lat) + "&lng=" + std::to_string(lon) + "&formatted=0&date=" + std::to_string(year) + "-" + std::to_string(month) + "-" + std::to_string(day);
+            callAPI(URL, APIs::SunriseAndSunset);
 
-        sunrise_sunset_call_count += 1;
-        } while (data_wrong);
+            previous_lon = lon;
+            previous_lat = lat;
+            previous_timezone = timezone;
+            sunrise_sunset_call_count += 1;
+        } while (data_wrong); //Sunrise Sunset API does retrieve wrong data with one day offset for some countries on the edges of the timezone (+12/-12UTC);
+    }
 
     if (count == 0 || time(0) > end_of_UTC_day || moon_phase.length() == 0) {
         int year = getYear(time(0));
