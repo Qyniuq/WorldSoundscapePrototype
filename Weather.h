@@ -12,7 +12,7 @@
 
 class Weather
 {
-private:   
+private: 
     std::ifstream in_file;
     CURL* curl;
     CURLcode res;
