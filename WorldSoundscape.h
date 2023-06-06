@@ -17,21 +17,22 @@
 #define KEY_r 114
 #define KEY_N 78
 #define KEY_n 110
-#define KEY_L 76
-#define KEY_l 108
-#define KEY_G 71
-#define KEY_g 103
+#define KEY_E 69
+#define KEY_e 101
+#define KEY_U 85
+#define KEY_u 117
 #define KEY_M 77
 #define KEY_m 109
-#define KEY_X 88
-#define KEY_x 120
+#define KEY_Q 81
+#define KEY_q 113
 
 extern std::atomic<bool> stop_flag;
 
 class WorldSoundscape
 {
 private:
-	std::mutex mut;
+	std::shared_mutex shmtx;
+	std::shared_mutex update_mtx;
 	std::atomic<bool> random_location_update{ false };
 	std::condition_variable cv;
 	ALCdevice* device {alcOpenDevice(nullptr)};

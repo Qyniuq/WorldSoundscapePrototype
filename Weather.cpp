@@ -3,15 +3,16 @@
 #include "ScaleLibrary.h"
 
 Weather::Weather(bool user_location, std::string city_input, std::string country_code_input, std::string state_code_input) : user_location{ user_location }, city{ city_input }, state_code{ state_code_input },
-country_code{ country_code_input }, scale{ "none" }, tonality{ "none" }, points {0}, city_input{ city_input }, weather_main{ "none" }, weather_description{ "none" }, temperature{ 0.0 }, feels_like{ 0.0 },
-wind_speed{ 0.0 }, rain_vol{ 0.0 }, snow_vol{ 0.0 }, cloudiness{ 0 }, humidity{ 0 }, visibility{ 0 }, timezone {0}, city_time{ "none" }, open_weather_call_count{ 0 }, sunrise_sunset_call_count{ 0 },
+country_code{ country_code_input }, scale{ "none" }, tonality{ "none" }, points{ 0 }, city_input{ city_input }, weather_main{ "none" }, weather_description{ "none" }, temperature{ 0.0 }, feels_like{ 0.0 },
+wind_speed{ 0.0 }, rain_vol{ 0.0 }, snow_vol{ 0.0 }, cloudiness{ 0 }, humidity{ 0 }, visibility{ 0 }, timezone{ 0 }, city_time{ "none" }, open_weather_call_count{ 0 }, sunrise_sunset_call_count{ 0 },
 USNO_call_count{ 0 }, geoPLUGIN_call_count{ 0 }, data_wrong{ false }, day_offset{ 0 }, sunrise{ 0, *this }, sunset{ 0, *this }, current_time{ 0, *this }, civil_dawn{ 0, *this }, civil_dusk{ 0, *this },
 nautical_dawn{ 0, *this }, nautical_dusk{ 0, *this }, astronomical_dawn{ 0, *this }, astronomical_dusk{ 0, *this }, solar_noon{ 0, *this }
 {
     in_file.open("apicode.txt");
     if (!in_file) {
         std::cerr << "apicode.txt not found" << std::endl;
-    } else {
+    }
+    else {
         std::getline(in_file, api_key);
     }
     in_file.close();
@@ -55,18 +56,18 @@ void Weather::callAPI(std::string URL, APIs API) {
         doc.Parse(chunk.memory);
 
         if (!doc.IsNull()) {
-            switch (API){
+            switch (API) {
             case APIs::geoPLUGIN:
                 updateGeoLocation();
                 break;
-            
-            case APIs::OpenWeather: 
+
+            case APIs::OpenWeather:
                 updateOpenWeatherData();
                 break;
 
             case APIs::SunriseAndSunset:
                 if (data_is_wrong(day_offset)) {
-                    data_wrong = true; //Sunrise Sunset API does retrieve wrong data with one day offset for some countries on the edges of the timezone (+12/-12UTC);
+                    data_wrong = true;
                 }
                 else {
                     data_wrong = false;
@@ -297,10 +298,10 @@ void Weather::display() {
     std::cout << std::setw(length - (14 + city_time.length())) << "" << "Current time: " << city_time << "\n";
     std::cout << std::setfill('-') << std::setw(length) << "" << std::setfill(' ') << "\n";
 
-    std::cout << "OPEN WEATHER API CALLS: " << open_weather_call_count << "\n";
-    std::cout << "SUNRISE SUNSET API CALLS: " << sunrise_sunset_call_count << "\n";
-    std::cout << "USNO API CALLS: " << USNO_call_count << "\n";
-    std::cout << "geoPLUGIN API CALLS: " << geoPLUGIN_call_count << "\n";
+    std::cout << "Open Weather calls: "  << std::setw(32) << open_weather_call_count << "E. Enter Location" << std::endl;
+    std::cout << std::left << "Sunrise Sunset calls: " << std::setw(30) << sunrise_sunset_call_count  << "R. Random Location" << std::endl;
+    std::cout << std::left << "USNO calls: " << std::setw(40) << USNO_call_count << "U. User Location" << std::endl;
+    std::cout << std::left << "GeoPlugin calls: " << std::setw(35) << geoPLUGIN_call_count << "Q. Quit" << std::endl;
 }
 
 void Weather::setCity(std::string city_input, std::string country_code_input) {
@@ -486,13 +487,14 @@ std::string Weather::getDayLightStatus(const time_t& current_time) {
             status = DaylightStatus::Night;
             return "Nigth";
         }
-        else if ((month >= 4 && month <= 9 && lat > 0 )|| (month <= 3 && month >= 10 && lat < 0)) {
-            if (current_time < solar_noon.utc_sec){
-            status = DaylightStatus::Morning;
-            return "Morning";
-            } else if (current_time >= solar_noon.utc_sec) {
-            status = DaylightStatus::Afternoon;
-            return "Afternoon";
+        else if ((month >= 4 && month <= 9 && lat > 0) || (month <= 3 && month >= 10 && lat < 0)) {
+            if (current_time < solar_noon.utc_sec) {
+                status = DaylightStatus::Morning;
+                return "Morning";
+            }
+            else if (current_time >= solar_noon.utc_sec) {
+                status = DaylightStatus::Afternoon;
+                return "Afternoon";
             }
         }
     }
@@ -630,6 +632,5 @@ Weather::Time::Time(const std::string& time, Weather& weather)
 
 Weather::Time::Time(const int& time, Weather& weather)
     : utc_sec{ time }, local_str{ weather.convertTimeToLocale(time) }, info{ weather.timeToStructTM(time) } {}
-
 
 
