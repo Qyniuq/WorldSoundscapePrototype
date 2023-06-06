@@ -7,6 +7,9 @@
 #ignore all directories with the name .vs
 .vs/
 
+#ignore all directories with the name x64
+x64/
+
 #ignore all .wav files
 *.wav
 

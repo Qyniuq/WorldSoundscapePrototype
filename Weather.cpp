@@ -1,5 +1,6 @@
 #include "Weather.h"
 #include <iomanip>
+#include "ScaleLibrary.h"
 
 Weather::Weather(bool user_location, std::string city_input, std::string country_code_input, std::string state_code_input) : user_location{ user_location }, city{ city_input }, state_code{ state_code_input },
 country_code{ country_code_input }, scale{ "none" }, tonality{ "none" }, points {0}, city_input{ city_input }, weather_main{ "none" }, weather_description{ "none" }, temperature{ 0.0 }, feels_like{ 0.0 },
@@ -10,9 +11,7 @@ nautical_dawn{ 0, *this }, nautical_dusk{ 0, *this }, astronomical_dawn{ 0, *thi
     in_file.open("apicode.txt");
     if (!in_file) {
         std::cerr << "apicode.txt not found" << std::endl;
-    }
-
-    else {
+    } else {
         std::getline(in_file, api_key);
     }
     in_file.close();
@@ -112,6 +111,7 @@ void Weather::callAllAPIs() {
     static int previous_timezone{ 0 };
     static double previous_lat{ 0. };
     static double previous_lon{ 0. };
+
     if (count == 0 || time(0) > end_of_UTC_day || timezone != previous_timezone || abs(lat - previous_lat) > 0.4 || abs(lon - previous_lon) > 0.4) {
         do {
             int year = getYear(time(0));
@@ -181,7 +181,6 @@ void Weather::updateGeoLocation() {
 void Weather::updateSunsetAndSunriseData() {
 
     end_of_current_day = getEndOfCurrentDay();
-
     day_length = getIntSubData("results", "day_length");
     day_length_seconds = convertStringToTime(day_length);
 
@@ -211,6 +210,8 @@ void Weather::updateSunsetAndSunriseData() {
 
     Time astronomical_dusk_temp(getStringSubData("results", "astronomical_twilight_end"), *this);
     astronomical_dusk = astronomical_dusk_temp;
+
+    day_light_status = getDayLightStatus(time(0));
 }
 
 void Weather::updateMoonPhase() {
@@ -218,6 +219,7 @@ void Weather::updateMoonPhase() {
     if (doc.HasMember("properties") && doc["properties"].IsObject()) {
         rapidjson::Value& properties_obj = doc["properties"];
         rapidjson::Value& data_obj = properties_obj["data"];
+
         if (data_obj.HasMember("curphase")) {
             moon_phase = data_obj["curphase"].GetString();
             moon_fracillum = data_obj["fracillum"].GetString();
@@ -261,9 +263,11 @@ void Weather::display() {
     int length{ 70 };
     std::cout << "\n";
     int space{ (length - (static_cast<int>(city_input.size()) + 5)) / 2 };
+
     std::cout << std::setprecision(9);
     std::cout << std::setw(space) << "" << city_input << " / " << country_code << "\n";
     std::cout << std::setfill('-') << std::setw(length) << "" << std::setfill(' ') << "\n";
+
     std::cout << "Temperature: ";
     if (temperature != 0) std::cout << temperature - 273.15 << "\370C / ";
     if (feels_like != 0) std::cout << "feels like " << feels_like - 273.15 << "\370C";
@@ -287,12 +291,12 @@ void Weather::display() {
     std::cout << "Nautical dusk ends at: " << nautical_dusk.local_str << "\n";
     std::cout << "Astronomical dusk ends at: " << astronomical_dusk.local_str << "\n";
     std::cout << "Moon phase: " << moon_phase; if (moon_fracillum != "none") std::cout << " " << moon_fracillum << "\n";
-
-    std::cout << "\nLatitude: " << lat << " / " << "Longitude: " << lon << "\n";
+    std::cout << "Latitude: " << lat << " / " << "Longitude: " << lon << "\n";
     std::cout << "Points: " << points << "\nScale: " << tonality << " " << scale << "\n";
     std::cout << std::right << std::setw(length) << day_light_status << std::left << "\n";
     std::cout << std::setw(length - (14 + city_time.length())) << "" << "Current time: " << city_time << "\n";
     std::cout << std::setfill('-') << std::setw(length) << "" << std::setfill(' ') << "\n";
+
     std::cout << "OPEN WEATHER API CALLS: " << open_weather_call_count << "\n";
     std::cout << "SUNRISE SUNSET API CALLS: " << sunrise_sunset_call_count << "\n";
     std::cout << "USNO API CALLS: " << USNO_call_count << "\n";
@@ -626,3 +630,6 @@ Weather::Time::Time(const std::string& time, Weather& weather)
 
 Weather::Time::Time(const int& time, Weather& weather)
     : utc_sec{ time }, local_str{ weather.convertTimeToLocale(time) }, info{ weather.timeToStructTM(time) } {}
+
+
+

@@ -21,6 +21,7 @@ public:
 
 	std::map <int, Sound> sounds;
 
+	Instrument() = default;
 	Instrument(std::string folder_dir, int min, int max, std::vector<int> oct, int sleep_val, const ALuint& effectSlot);
 
 	std::map<int, Sound> LoadSounds();
