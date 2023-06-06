@@ -5,7 +5,6 @@
 #include <random>
 #include <limits>
 #include <numeric>
-#undef max
 using namespace std::literals;
 
 WorldSoundscape::WorldSoundscape() : weather{ false, "none", "none", "none" } {
@@ -54,7 +53,7 @@ void WorldSoundscape::mainMenu() {
 		"R: Random Location\n" <<
 		"E: Enter Location\n" <<
 		"U: User Location\n" <<
-		"X: Exit\n";
+		"Q: Exit\n";
 
 	bool valid_response{ false };
 	while (!valid_response) {
@@ -137,8 +136,12 @@ void WorldSoundscape::setUserEnterLocation()
 
 void WorldSoundscape::setUserlocation()
 {
+	update_mtx.lock();
+	cv.notify_all();
 	weather.user_location = true;
 	weather.callAllAPIs();
+	updateScale();
+	update_mtx.unlock();
 }
 
 void WorldSoundscape::setRandomLocation() {
@@ -157,8 +160,8 @@ void WorldSoundscape::setRandomLocation() {
 	const char* country_code = city["country"].GetString();
 	update_mtx.lock();
 	cv.notify_all();
-	system("cls");
-	std::cout << "New Random Location..." << std::endl;
+	//system("cls");
+	//std::cout << "New Random Location..." << std::endl;
 	weather.city = city_name;
 	weather.city_input = city_name;
 	weather.whiteSpaceURLManager(weather.city);
@@ -258,19 +261,24 @@ void WorldSoundscape::keyboard_listener() {
 			cv.notify_all();
 			stop_flag = true;
 			break;
-
+		case KEY_U:
+		case KEY_u:
+			setUserlocation();
+			break;
 		case KEY_Q:
 		case KEY_q:
+			update_mtx.lock();
 			system("cls");
 			std::cout << "Exiting programm..." << std::endl;
 			stop_flag = true;
 			cv.notify_all();
 			exit_World_Soundscape = true;
 			value = KEY_Q;
+			update_mtx.unlock();
 			break;
 
 		default:
-			std::cout << "Wrong command" << std::endl;
+			std::cout << " Wrong command" << std::endl;
 		}
 	}
 }
