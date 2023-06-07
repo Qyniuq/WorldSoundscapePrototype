@@ -580,13 +580,16 @@ int getWeatherPoints(const Weather& weather) {
 	return points;
 }
 
+int getNumberInRange(int min, int max, int number) {
+	int range = max - min + 1;
+	int result = ((number - min) % range + range) % range + min;
+	return result;
+}
+
 std::string noteNumberToString(int Note) {
 	std::string result;
 
-	if (Note < 0) Note += 12;
-	if (Note < -12) Note += 12;
-
-	Note %= 12;
+	Note = getNumberInRange(0, 11, Note);
 
 	switch (Note) {
 	case 0:
@@ -633,12 +636,6 @@ std::string noteNumberToString(int Note) {
 	return result;
 }
 
-int getNumberInRange(int min, int max, int number) {
-	int range = max - min + 1;
-	int result = ((number - min) % range + range) % range + min;
-	return result;
-}
-
 int getRoot(Weather &weather) {
 
 	int tonic = weather.timezone / 3600;
@@ -676,6 +673,9 @@ int getRoot(Weather &weather) {
 			break;
 		case 6:
 			interval = minor_second;
+			break;
+		default:
+			std::cout << "some error ocurred in wind level switch";
 		}
 
 		tonic += (temperature * interval) % 12;

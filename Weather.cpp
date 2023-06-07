@@ -3,6 +3,8 @@
 #include "ScaleLibrary.h"
 #include "CountryMap.h"
 
+using namespace std::literals;
+
 Weather::Weather(bool user_location, std::string city_input, std::string country_code_input, std::string state_code_input) : user_location{ user_location }, city{ city_input }, state_code{ state_code_input },
 country_code{ country_code_input }, scale{ "none" }, tonality{ "none" }, points{ 0 }, city_input{ city_input }, weather_main{ "none" }, weather_description{ "none" }, temperature{ 0.0 }, feels_like{ 0.0 },
 wind_speed{ 0.0 }, rain_vol{ 0.0 }, snow_vol{ 0.0 }, cloudiness{ 0 }, humidity{ 0 }, visibility{ 0 }, timezone{ 0 }, city_time{ "none" }, open_weather_call_count{ 0 }, sunrise_sunset_call_count{ 0 },
@@ -152,9 +154,7 @@ time_t Weather::getEndOfUTCDay() {
 
     time_t day_length = 86400;
     time_t local_time = time(0);
-
     time_t elapsed_time = local_time % day_length;
-
     time_t time_left = day_length - elapsed_time;
 
     return (local_time + time_left);
@@ -164,15 +164,14 @@ time_t Weather::getEndOfCurrentDay() {
 
     time_t day_length = 86400;
     time_t local_time = time(0) + timezone;
-
     time_t elapsed_time = local_time % day_length;
-
     time_t time_left = day_length - elapsed_time;
 
     return (local_time + time_left);
 }
 
 void Weather::updateGeoLocation() {
+
     std::string c = getStringData("geoplugin_city");
     if (c.length() == 0) c = getStringData("geoplugin_region");
     std::string c_code = getStringData("geoplugin_countryCode");
@@ -283,6 +282,7 @@ void Weather::display() {
     std::cout << "Snow volume: " << snow_vol << " mm/h\n";
     std::cout << "Humidity: " << humidity << "%\n";
     std::cout << "Cloudiness: " << cloudiness << "%\n";
+
     std::cout << "Astronomical Dawn begins at: " << astronomical_dawn.local_str << "\n";
     std::cout << "Nautical Dawn begins at: " << nautical_dawn.local_str << "\n";
     std::cout << "Civil Dawn begins at: " << civil_dawn.local_str << "\n";
@@ -292,6 +292,7 @@ void Weather::display() {
     std::cout << "Civil dusk ends at: " << civil_dusk.local_str << "\n";
     std::cout << "Nautical dusk ends at: " << nautical_dusk.local_str << "\n";
     std::cout << "Astronomical dusk ends at: " << astronomical_dusk.local_str << "\n";
+
     std::cout << "Moon phase: " << moon_phase; if (moon_fracillum != "none") std::cout << " " << moon_fracillum << "\n";
     std::cout << "Latitude: " << lat << " / " << "Longitude: " << lon << "\n";
     std::cout << "Points: " << points << "\nScale: " << tonality << " " << scale << "\n";
@@ -312,31 +313,34 @@ void Weather::setCity(std::string city_input, std::string country_code_input) {
     country_code = country_code_input;
 }
 
+void Weather::loadCitiesList(){
+    std::ifstream file("cities.json");
+    if (!file) {
+        std::cerr << "cities.json not found";
+    } else {
+        std::string str((std::istreambuf_iterator<char>(file)),
+        std::istreambuf_iterator<char>());
+        cities.Parse(str.c_str());
+        //std::cout << "Cities list sucessfully loaded\n";
+    }
+}
+
 time_t Weather::convertStringToTime(const std::string& str) {
-
     int current_year = getYear(time(0));
-
-    if (str.substr(0, 4) != std::to_string(current_year))
-    {
+    if (str.substr(0, 4) != std::to_string(current_year)){
         return 0;
     }
-
     std::stringstream ss(str);
-
     std::tm time = {};
     ss >> std::get_time(&time, "%Y-%m-%dT%H:%M:%S");
-
-    // Convert to time_t
     time_t time_seconds = _mkgmtime(&time);
 
     return time_seconds;
 }
 
 std::string Weather::convertUTCtimeToString(const int& previous_time) {
-
     bool is_negative = (previous_time < 0);
     int time_abs = std::abs(previous_time);
-
     int hours = time_abs / 3600;
     int minutes = (time_abs % 3600) / 60;
 
@@ -348,7 +352,6 @@ std::string Weather::convertUTCtimeToString(const int& previous_time) {
 }
 
 std::string Weather::convertTimeToLocale(const time_t& previous_time) {
-
     if (previous_time == 0)
         return "00:00:00";
     else {
@@ -365,35 +368,27 @@ std::string Weather::convertTimeToLocale(const time_t& previous_time) {
 }
 
 struct tm Weather::timeToStructTM(time_t t) {
-
     struct tm timeinfo;
     gmtime_s(&timeinfo, &t);
-
     return timeinfo;
 }
 
 void Weather::setWeather() {
-
     if (doc.HasMember("weather") && doc["weather"].IsArray() && !doc["weather"].Empty()) {
-
         rapidjson::Value& weather_array = doc["weather"];
         if (weather_array[0].HasMember("main") && weather_array[0]["main"].IsString()) {
             weather_main = weather_array[0]["main"].GetString();
             for (auto& c : weather_main) { c = tolower(c); }
         }
-
         if (weather_array[0].HasMember("description") && weather_array[0]["description"].IsString()) {
             weather_description = weather_array[0]["description"].GetString();
         }
-    }
-    else
+    } else
         std::cout << "ERROR: No conexion stablished\n";
 }
 
 std::string Weather::getStringData(const std::string& data) {
-
     std::string result{ "none" };
-
     if (doc.HasMember(data.c_str()) && doc[data.c_str()].IsString()) {
         result = doc[data.c_str()].GetString();
     }
@@ -404,9 +399,7 @@ std::string Weather::getStringData(const std::string& data) {
 }
 
 std::string Weather::getStringSubData(const std::string& main, const std::string& subdata) {
-
     std::string result{ "none" };
-
     if (doc.HasMember(main.c_str()) && doc[main.c_str()].IsObject()) {
         rapidjson::Value& main_obj = doc[main.c_str()];
 
@@ -424,7 +417,6 @@ std::string Weather::getStringSubData(const std::string& main, const std::string
 }
 
 int Weather::getIntData(const std::string& input) {
-
     int result{ 0 };
     if (doc.HasMember(input.c_str()) && doc[input.c_str()].IsInt())
         result = doc[input.c_str()].GetInt();
@@ -499,63 +491,52 @@ std::string Weather::getDayLightStatus(const time_t& current_time) {
             }
         }
     }
-
     if (current_time < astronomical_dawn.utc_sec && current_time < solar_noon.utc_sec) {
         status = DaylightStatus::Night;
         return "Night";
     }
-
     else if ((current_time >= astronomical_dawn.utc_sec && current_time < nautical_dawn.utc_sec && nautical_dawn.utc_sec != 0 && current_time < solar_noon.utc_sec)
         || (current_time >= astronomical_dawn.utc_sec && current_time > nautical_dawn.utc_sec && nautical_dawn.utc_sec == 0 && sunrise.utc_sec == 0 && current_time < solar_noon.utc_sec)) {
         status = DaylightStatus::Astronomical_Dawn;
         return "Astronomical dawn";
     }
-
     else if ((current_time >= nautical_dawn.utc_sec && current_time < civil_dawn.utc_sec && civil_dawn.utc_sec != 0 && current_time < solar_noon.utc_sec)
         || (current_time >= nautical_dawn.utc_sec && current_time > civil_dawn.utc_sec && civil_dawn.utc_sec == 0 && sunrise.utc_sec == 0 && current_time < solar_noon.utc_sec)) {
         status = DaylightStatus::Nautical_Dawn;
         return "Nautical dawn";
     }
-
     else if ((current_time >= civil_dawn.utc_sec && current_time < sunrise.utc_sec && sunrise.utc_sec != 0)
         || (current_time >= civil_dawn.utc_sec && current_time > sunrise.utc_sec && sunrise.utc_sec == 0 && current_time < solar_noon.utc_sec)) {
         status = DaylightStatus::Civil_Dawn;
         return "Civil dawn";
     }
-
     else if (current_time >= sunrise.utc_sec && current_time < sunset.utc_sec && current_time < solar_noon.utc_sec) {
         status = DaylightStatus::Morning;
         return "Morning";
     }
-
     else if (current_time >= sunrise.utc_sec && current_time < sunset.utc_sec && current_time >= solar_noon.utc_sec) {
         status = DaylightStatus::Afternoon;
         return "Afternoon";
     }
-
     else if ((current_time >= sunset.utc_sec && current_time < civil_dusk.utc_sec)
         || (current_time >= sunset.utc_sec && civil_dusk.utc_sec == 0 && nautical_dusk.utc_sec == 0 && astronomical_dusk.utc_sec == 0)) {
         status = DaylightStatus::Civil_Dusk;
         return "Civil dusk";
     }
-
     else if ((current_time >= civil_dusk.utc_sec && current_time < nautical_dusk.utc_sec && nautical_dusk.utc_sec != 0)
         || (current_time >= civil_dusk.utc_sec && nautical_dusk.utc_sec == 0 && astronomical_dusk.utc_sec == 0)) {
         status = DaylightStatus::Nautical_Dusk;
         return "Nautical dusk";
     }
-
     else if ((current_time >= nautical_dusk.utc_sec && current_time < astronomical_dusk.utc_sec && astronomical_dusk.utc_sec != 0)
         || (current_time > nautical_dusk.utc_sec && astronomical_dusk.utc_sec == 0)) {
         status = DaylightStatus::Astronomical_Dusk;
         return "Astronomical dusk";
     }
-
     else if (current_time >= astronomical_dusk.utc_sec && astronomical_dusk.utc_sec != 0 || current_time < astronomical_dawn.utc_sec) {
         status = DaylightStatus::Night;
         return "Night";
     }
-
     else
         return "error un getting daylight status";
 }

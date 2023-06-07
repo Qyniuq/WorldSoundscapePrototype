@@ -2,7 +2,6 @@
 #include "Weather.h"
 #include "Sound.h"
 #include "Instrument.h"
-#include "InstrumentInitializers.h"
 #include "ScaleLibrary.h"
 #include <ctime>
 #include <thread>
@@ -13,24 +12,12 @@
 #include <shared_mutex>
 #include <iostream>
 
-#define KEY_R 82
-#define KEY_r 114
-#define KEY_N 78
-#define KEY_n 110
-#define KEY_E 69
-#define KEY_e 101
-#define KEY_U 85
-#define KEY_u 117
-#define KEY_M 77
-#define KEY_m 109
-#define KEY_Q 81
-#define KEY_q 113
-
 extern std::atomic<bool> stop_flag;
 
 class WorldSoundscape
 {
 private:
+	bool paused {false};
 	std::shared_mutex shmtx;
 	std::shared_mutex update_mtx;
 	std::atomic<bool> random_location_update{ false };
@@ -52,6 +39,7 @@ public:
 	void setRandomLocation();
 	void setUserEnterLocation();
 	void setUserlocation();
+	void waitForCitiesListLoading();
 	void mainMenu();
 	void displayWeather(Weather& weather, std::vector<std::string>& notes_played);
 	void updateWeather(Weather& weather);

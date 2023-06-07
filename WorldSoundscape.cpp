@@ -5,9 +5,26 @@
 #include <random>
 #include <limits>
 #include <numeric>
+#include <future>
+#include <thread>
+#include "InstrumentInitializers.h"
+
+#define KEY_R 82
+#define KEY_r 114
+#define KEY_N 78
+#define KEY_n 110
+#define KEY_E 69
+#define KEY_e 101
+#define KEY_U 85
+#define KEY_u 117
+#define KEY_M 77
+#define KEY_m 109
+#define KEY_Q 81
+#define KEY_q 113
+#define KEY_P 80
+#define KEY_p 112
 
 using namespace std::literals;
-
 auto last_update_time = std::chrono::steady_clock::now();
 
 WorldSoundscape::WorldSoundscape() : weather{ false, "none", "none", "none" } {
@@ -39,8 +56,14 @@ WorldSoundscape::WorldSoundscape() : weather{ false, "none", "none", "none" } {
 
 	alAuxiliaryEffectSloti(reverbEffectSlot, AL_EFFECTSLOT_EFFECT, reverbEffect);
 
-	Jaguar = CreateJaguarGuitar(reverbEffectSlot);
-	FemaleVoice = CreateFemaleVoice(reverbEffectSlot);
+
+	std::thread loadCitiesThread([this]() { weather.loadCitiesList(); });
+	loadCitiesThread.detach();
+	std::future<Instrument> jaguar_f = std::async(std::launch::async, CreateJaguarGuitar, reverbEffectSlot);
+	std::future<Instrument> female_f = std::async(std::launch::async, CreateFemaleVoice, reverbEffectSlot);
+
+	Jaguar = jaguar_f.get();
+	FemaleVoice = female_f.get();
 }
 
 WorldSoundscape::~WorldSoundscape()
@@ -51,13 +74,27 @@ WorldSoundscape::~WorldSoundscape()
 	alcCloseDevice(device);
 }
 
+void WorldSoundscape::waitForCitiesListLoading() {
+	if (weather.cities.IsNull()) {
+		std::cout << "Loading..." << std::endl;
+		while (weather.cities.IsNull())
+			std::this_thread::sleep_for(100ms);
+	}
+}
+
 void WorldSoundscape::mainMenu() {
 	system("cls");
-	std::cout << "Welcome to World Soundscape, press the following keys to select an option:\n" <<
-		"R: Random Location\n" <<
-		"E: Enter Location\n" <<
-		"U: User Location\n" <<
-		"Q: Exit\n";
+	std::cout << "   __    __    __  ____\n";
+	std::cout << "   \\ \\  /  \\  / / / ___|  \n";
+	std::cout << "    \\ \\/ /\\ \\/ /  \\___ \\\n";
+	std::cout << "     \\__/  \\__/   |____/  \n";
+
+
+
+	std::cout<<	"\n     R: Random Location\n" <<
+		"     E: Enter Location\n" <<
+		"     U: User Location\n" <<
+		"     Q: Exit\n";
 
 	bool valid_response{ false };
 	while (!valid_response) {
@@ -66,6 +103,7 @@ void WorldSoundscape::mainMenu() {
 		case KEY_r:
 			system("cls");
 			std::cout << "R A N D O M   L O C A T I O N" << std::endl;
+			waitForCitiesListLoading();
 			setRandomLocation();
 			valid_response = true;
 			break;
@@ -103,8 +141,6 @@ void WorldSoundscape::mainMenu() {
 }
 
 void WorldSoundscape::initMusic() {
-	//Instrument Jaguar = CreateJaguarGuitar(reverbEffectSlot);
-	//Instrument FemaleVoice = CreateFemaleVoice(reverbEffectSlot);
 	std::vector<std::string > notes_played;
 	std::jthread update_weather_thread(&WorldSoundscape::updateWeather, this, std::ref(weather));
 	std::jthread display_weather_thread(&WorldSoundscape::displayWeather, this, std::ref(weather), std::ref(notes_played));
@@ -113,8 +149,7 @@ void WorldSoundscape::initMusic() {
 	std::jthread keyboard_listener_thread(&WorldSoundscape::keyboard_listener, this);
 }
 
-void WorldSoundscape::setUserEnterLocation()
-{
+void WorldSoundscape::setUserEnterLocation(){
 	update_mtx.lock();
 	system("cls");
 	std::cout << "New User Location..." << std::endl;
@@ -139,8 +174,7 @@ void WorldSoundscape::setUserEnterLocation()
 	update_mtx.unlock();
 }
 
-void WorldSoundscape::setUserlocation()
-{
+void WorldSoundscape::setUserlocation(){
 	update_mtx.lock();
 	cv.notify_all();
 	weather.user_location = true;
@@ -151,32 +185,27 @@ void WorldSoundscape::setUserlocation()
 }
 
 void WorldSoundscape::setRandomLocation() {
-	if (weather.cities.IsNull()) {
-		std::ifstream file("cities.json");
-		std::string str((std::istreambuf_iterator<char>(file)),
-			std::istreambuf_iterator<char>());
-		weather.cities.Parse(str.c_str());
+	if (!weather.cities.IsNull()) {	
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_int_distribution<> dis(0, weather.cities.Size() - 1);
+		int index = dis(gen);
+		const rapidjson::Value& city = weather.cities[index];
+		const char* city_name = city["name"].GetString();
+		const char* country_code = city["country"].GetString();
+		update_mtx.lock();
+		cv.notify_all();
+		weather.city = city_name;
+		weather.city_input = city_name;
+		weather.whiteSpaceURLManager(weather.city);
+		weather.country_code = country_code;
+		weather.user_location = false;
+		weather.callAllAPIs();
+		updateScale();
+		last_update_time = std::chrono::steady_clock::now();
+		update_mtx.unlock();
 	}
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_int_distribution<> dis(0, weather.cities.Size() - 1);
-	int index = dis(gen);
-	const rapidjson::Value& city = weather.cities[index];
-	const char* city_name = city["name"].GetString();
-	const char* country_code = city["country"].GetString();
-	update_mtx.lock();
-	cv.notify_all();
-	//system("cls");
-	//std::cout << "New Random Location..." << std::endl;
-	weather.city = city_name;
-	weather.city_input = city_name;
-	weather.whiteSpaceURLManager(weather.city);
-	weather.country_code = country_code;
-	weather.user_location = false;
-	weather.callAllAPIs();
-	updateScale();
-	last_update_time = std::chrono::steady_clock::now();
-	update_mtx.unlock();
+	else { std::cerr << "cities list wasn't ready for random location";}
 }
 
 void WorldSoundscape::displayWeather(Weather& weather, std::vector<std::string>& notes_played) {
@@ -193,7 +222,7 @@ void WorldSoundscape::displayWeather(Weather& weather, std::vector<std::string>&
 
 		shmtx.unlock();
 		update_lock.unlock();
-		cv.wait_for(lock, 1s);
+		cv.wait_for(lock, 100ms);
 	}
 }
 
@@ -256,7 +285,6 @@ void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::
 }
 
 void WorldSoundscape::keyboard_listener() {
-
 	int value{ 0 };
 	while (value != KEY_Q) {
 		switch (_getch()) {
@@ -264,12 +292,10 @@ void WorldSoundscape::keyboard_listener() {
 		case KEY_r:
 			setRandomLocation();
 			break;
-
 		case KEY_E:
 		case KEY_e:
 			setUserEnterLocation();
 			break;
-
 		case KEY_M:
 		case KEY_m:
 			system("cls");
@@ -299,14 +325,12 @@ void WorldSoundscape::keyboard_listener() {
 	}
 }
 
-void WorldSoundscape::updateScale()
-{
+void WorldSoundscape::updateScale(){
 	guitar_mode = setScaleForInstrument(Jaguar, weather);
 	female_voice_mode = setScaleForInstrument(FemaleVoice, weather);
 }
 
-std::vector<notes> WorldSoundscape::getMode(Instrument& i)
-{
+std::vector<notes> WorldSoundscape::getMode(Instrument& i){
 	if (i.min == -1) return female_voice_mode;
 	else if (i.min == -22) return guitar_mode;
 	else {

@@ -109,6 +109,7 @@ public:
     void callAPI(std::string URL, APIs api);
     void callAllAPIs();
     void setCity(std::string city, std::string country_code);
+    void loadCitiesList();
     void setWeather();
     void updateGeoLocation();
     void updateOpenWeatherData();
