@@ -9,6 +9,7 @@
 #include <sstream>
 #include <thread>
 #include <vector>
+#include <map>
 
 class Weather
 {
@@ -49,6 +50,8 @@ public:
     std::string city;
     std::string state_code;
     std::string country_code;
+    std::string country_name {"none"};
+    std::map<std::string, std::string> countryMap;
     bool user_location;
     enum class APIs { OpenWeather = 0, SunriseAndSunset = 1, USNO = 2, geoPLUGIN = 3 };
     enum class DaylightStatus { Night = 0, Astronomical_Dawn, Nautical_Dawn, Civil_Dawn, Morning = 4, Afternoon, Civil_Dusk, Nautical_Dusk, Astronomical_Dusk };

@@ -5,7 +5,10 @@
 #include <random>
 #include <limits>
 #include <numeric>
+
 using namespace std::literals;
+
+auto last_update_time = std::chrono::steady_clock::now();
 
 WorldSoundscape::WorldSoundscape() : weather{ false, "none", "none", "none" } {
 
@@ -49,6 +52,7 @@ WorldSoundscape::~WorldSoundscape()
 }
 
 void WorldSoundscape::mainMenu() {
+	system("cls");
 	std::cout << "Welcome to World Soundscape, press the following keys to select an option:\n" <<
 		"R: Random Location\n" <<
 		"E: Enter Location\n" <<
@@ -122,7 +126,7 @@ void WorldSoundscape::setUserEnterLocation()
 	std::getline(std::cin, weather.country_code);
 
 	if (weather.country_code == "US") {
-		std::cout << "Please enter the state code for more accuracy: ";
+		std::cout << "Please enter the state code for more accuracy, type \"none\" if not needed: ";
 		std::getline(std::cin, weather.state_code);
 	}
 	else {
@@ -131,6 +135,7 @@ void WorldSoundscape::setUserEnterLocation()
 	weather.user_location = false;
 	weather.callAllAPIs();
 	updateScale();
+	last_update_time = std::chrono::steady_clock::now();
 	update_mtx.unlock();
 }
 
@@ -141,6 +146,7 @@ void WorldSoundscape::setUserlocation()
 	weather.user_location = true;
 	weather.callAllAPIs();
 	updateScale();
+	last_update_time = std::chrono::steady_clock::now();
 	update_mtx.unlock();
 }
 
@@ -169,6 +175,7 @@ void WorldSoundscape::setRandomLocation() {
 	weather.user_location = false;
 	weather.callAllAPIs();
 	updateScale();
+	last_update_time = std::chrono::steady_clock::now();
 	update_mtx.unlock();
 }
 
@@ -197,11 +204,14 @@ void WorldSoundscape::updateWeather(Weather& weather) {
 		float reverbGain = static_cast<float>(weather.humidity) / 100.0f;
 		alEffectf(reverbEffect, AL_EAXREVERB_GAIN, reverbGain);
 		alAuxiliaryEffectSloti(reverbEffectSlot, AL_EFFECTSLOT_EFFECT, reverbEffect);
-		std::this_thread::sleep_for(5s);
+		while (std::chrono::steady_clock::now() < (last_update_time + 5s)) {
+			std::this_thread::sleep_for(100ms);
+		}
 		if (!stop_flag) {
 			std::shared_lock up_lock(update_mtx);
 			weather.callAllAPIs();
 			updateScale();
+			last_update_time = std::chrono::steady_clock::now();
 			up_lock.unlock();
 		}
 	}
@@ -216,8 +226,14 @@ void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::
 
 	while (!stop_flag) {
 		std::unique_lock<std::mutex> lock(mtx);
-		if (notes_played.size() >= 20)
-			notes_played.clear();
+		if (notes_played.size() >= 20){
+			shmtx.lock();
+			try {
+				notes_played.clear();
+			}
+			catch (std::exception& e) { std::cerr << "exception caught: " << e.what() << std::endl;}
+			shmtx.unlock();
+		}
 		std::shared_lock update_lock(update_mtx);
 		mode = getMode(instrument);
 		r = rand() % mode.size();

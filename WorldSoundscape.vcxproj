@@ -148,6 +148,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CountryMap.cpp" />
     <ClCompile Include="Instrument.cpp" />
     <ClCompile Include="InstrumentInitializers.cpp" />
     <ClCompile Include="main.cpp" />
@@ -157,6 +158,7 @@
     <ClCompile Include="WorldSoundscape.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CountryMap.h" />
     <ClInclude Include="Instrument.h" />
     <ClInclude Include="InstrumentInitializers.h" />
     <ClInclude Include="ScaleLibrary.h" />

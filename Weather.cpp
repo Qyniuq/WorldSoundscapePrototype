@@ -1,6 +1,7 @@
 #include "Weather.h"
 #include <iomanip>
 #include "ScaleLibrary.h"
+#include "CountryMap.h"
 
 Weather::Weather(bool user_location, std::string city_input, std::string country_code_input, std::string state_code_input) : user_location{ user_location }, city{ city_input }, state_code{ state_code_input },
 country_code{ country_code_input }, scale{ "none" }, tonality{ "none" }, points{ 0 }, city_input{ city_input }, weather_main{ "none" }, weather_description{ "none" }, temperature{ 0.0 }, feels_like{ 0.0 },
@@ -16,8 +17,8 @@ nautical_dawn{ 0, *this }, nautical_dusk{ 0, *this }, astronomical_dawn{ 0, *thi
         std::getline(in_file, api_key);
     }
     in_file.close();
-
     whiteSpaceURLManager(city);
+    countryMap = createCountryMap();
 }
 
 size_t Weather::WriteMemoryCallback(void* contents, size_t size, size_t nmemb, void* userp) {
@@ -113,7 +114,7 @@ void Weather::callAllAPIs() {
     static double previous_lat{ 0. };
     static double previous_lon{ 0. };
 
-    if (count == 0 || time(0) > end_of_UTC_day || timezone != previous_timezone || abs(lat - previous_lat) > 0.4 || abs(lon - previous_lon) > 0.4) {
+    if (count == 0 || time(0) > end_of_UTC_day || timezone != previous_timezone || lat != previous_lat || lon != previous_lon) {
         do {
             int year = getYear(time(0));
             int month = getMonth(time(0));
@@ -126,7 +127,7 @@ void Weather::callAllAPIs() {
 
             URL = "https://api.sunrise-sunset.org/json?lat=" + std::to_string(lat) + "&lng=" + std::to_string(lon) + "&formatted=0&date=" + std::to_string(year) + "-" + std::to_string(month) + "-" + std::to_string(day);
             callAPI(URL, APIs::SunriseAndSunset);
-
+            country_name = getCountryName(countryMap, country_code);
             previous_lon = lon;
             previous_lat = lat;
             previous_timezone = timezone;
@@ -263,10 +264,10 @@ void Weather::display() {
     city_time = convertTimeToLocale(time(0));
     int length{ 70 };
     std::cout << "\n";
-    int space{ (length - (static_cast<int>(city_input.size()) + 5)) / 2 };
+    int space{ (length - (static_cast<int>(city_input.size()) + 2 + static_cast<int>(country_name.size()))) / 2 };
 
     std::cout << std::setprecision(9);
-    std::cout << std::setw(space) << "" << city_input << " / " << country_code << "\n";
+    std::cout << std::setw(space) << "" << city_input << " / " << country_name << "\n";
     std::cout << std::setfill('-') << std::setw(length) << "" << std::setfill(' ') << "\n";
 
     std::cout << "Temperature: ";

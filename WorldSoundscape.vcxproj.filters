@@ -36,6 +36,9 @@
     <ClCompile Include="WorldSoundscape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CountryMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Instrument.h">
@@ -54,6 +57,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WorldSoundscape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CountryMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

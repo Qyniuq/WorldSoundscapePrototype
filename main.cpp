@@ -19,8 +19,6 @@ int main() {
 	WorldSoundscape MyApp;
 	MyApp.mainMenu();
 	while(!MyApp.exit_World_Soundscape){
-	MyApp.weather.callAllAPIs();
-	MyApp.updateScale();
 	if(!MyApp.exit_World_Soundscape) 
 		MyApp.initMusic();
 	}
