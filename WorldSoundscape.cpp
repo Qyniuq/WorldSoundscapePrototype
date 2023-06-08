@@ -7,6 +7,7 @@
 #include <numeric>
 #include <future>
 #include <thread>
+#include <iomanip>
 #include "InstrumentInitializers.h"
 
 #define KEY_R 82
@@ -23,6 +24,8 @@
 #define KEY_q 113
 #define KEY_P 80
 #define KEY_p 112
+#define KEY_F 70
+#define KEY_f 102
 
 using namespace std::literals;
 auto last_update_time = std::chrono::steady_clock::now();
@@ -57,6 +60,13 @@ WorldSoundscape::WorldSoundscape() : weather{ false, "none", "none", "none" } {
 
 	alAuxiliaryEffectSloti(reverbEffectSlot, AL_EFFECTSLOT_EFFECT, reverbEffect);
 
+	Saved_Locations = {
+		Location("Madrid", "ES", -3.7026, 40.4165),
+		Location("London", "GB", -0.1257, 51.5085),
+		Location("McMurdo Station", "AQ", 168.2227, -77.6554),
+		Location("New York", "US", -74.006, 40.7143),
+	};
+
 	std::thread loadCitiesThread([this]() { weather.loadCitiesList(); });
 	loadCitiesThread.detach();
 	std::future<Instrument> jaguar_f = std::async(std::launch::async, CreateJaguarGuitar, reverbEffectSlot);
@@ -75,37 +85,35 @@ WorldSoundscape::~WorldSoundscape()
 }
 
 void WorldSoundscape::waitForCitiesListLoading() {
+
 	if (weather.cities.IsNull()) {
-		std::cout << "\n   loading..." << std::endl;
+		std::cout << std::endl << std::setw(27) << "" << "[loading...]" << std::endl;
 		while (weather.cities.IsNull())
 			std::this_thread::sleep_for(100ms);
 	}
 }
 
-void WorldSoundscape::mainMenu() {
-	
+void WorldSoundscape::mainMenu() {	
 	bool valid_response{ false };
+	int margin{ 20 };
 	int option{ 0 };
 	char key = ' ';
 	while (key != 13 && !valid_response) {
 		system("cls");
-		//std::cout << "Option is: " << option << std::endl;
-		std::cout << "\033[1;37m";
-		std::cout << "  __     __     __   ________    ___    _ " << "  " << " ______\n";
-		std::cout << "  \\ \\   /  \\   / /  / _______|  |   \\  | |" << "  " << "|  ___ \\\n";
-		std::cout << "   \\ \\ / /\\ \\ / /   \\______ \\   | |\\ \\ | |" << "  " << "| |   \\ \\\n";
-		std::cout << "    \\   /  \\   /   _______/ /   | | \\ \\| |" << "  " << "| |___/ /\n";
-
-		std::cout << "     \\_/    \\_/   |________/    |_|  \\___|  |______/\n\n";
+		std::cout << "\033[1;37m \n";
+		std::cout << "         __    __    __   _______    ___    _ " << "  " << " ______\n";
+		std::cout << "         \\ \\  /  \\  / /  / ______|  |   \\  | |" << "  " << "|  ___ \\\n";
+		std::cout << "          \\ \\/ /\\ \\/ /   \\_____ \\   | |\\ \\ | |" << "  " << "| |   \\ \\\n";
+		std::cout << "           \\  /  \\  /   ______/ /   | | \\ \\| |" << "  " << "| |___/ /\n";
+		std::cout << "            \\/    \\/   |_______/    |_|  \\___|  |______/\n\n";
 		std::cout << "\033[1;30m";
-		std::cout << "      W O R L D   S O U N D  /  P R O C E D U R A L        \n";
-
+		std::cout << "           W O R L D   S O U N D  /  P R O C E D U R A L        \n";
 		std::cout << "\033[0m";
-
-		std::cout << "\n     [R] "; if (option == 0) std::cout << "\033[1;30;47m"; std::cout << "Random Location\n" << "\033[0m" <<
-			"     [E] "; if (option == 1) std::cout << "\033[1;30;47m"; std::cout << "Enter Location\n" << "\033[0m" <<
-			"     [U] "; if (option == 2) std::cout << "\033[1;30;47m"; std::cout << "User Location\n" << "\033[0m" <<
-			"     [Q] "; if (option == 3) std::cout << "\033[1;30;47m"; std::cout << "Quit\n" << "\033[0m";
+		std::cout << "\n\n           [R] "; if (option == 0) std::cout << "\033[1;30;47m"; std::cout << "Random Location\n" << "\033[0m" <<
+			"           [E] "; if (option == 1) std::cout << "\033[1;30;47m"; std::cout << "Enter Location\n" << "\033[0m" <<
+			"           [U] "; if (option == 2) std::cout << "\033[1;30;47m"; std::cout << "User Location\n" << "\033[0m" <<
+			"           [F] "; if (option == 3) std::cout << "\033[1;30;47m"; std::cout << "Favourite Locations\n" << "\033[0m" <<
+			"           [Q] "; if (option == 4) std::cout << "\033[1;30;47m"; std::cout << "Quit\n" << "\033[0m";
 
 		key = _getch();
 		if (key == 0 || key == -32) {  // Arrow Keys first value
@@ -114,7 +122,7 @@ void WorldSoundscape::mainMenu() {
 			switch (key) {
 			case 80:
 				option += 1;
-				option = option > 3 ? 0 : option;
+				option = option > 4 ? 0 : option;
 				break;
 			case 72:
 				option -= 1;
@@ -129,7 +137,8 @@ void WorldSoundscape::mainMenu() {
 			case KEY_R:
 			case KEY_r:
 				system("cls");
-				std::cout << "\n   R A N D O M   L O C A T I O N" << std::endl;
+				std::cout << "\n";
+				std::cout << std::left << std::setw(margin) << "" << "R A N D O M   L O C A T I O N" << std::endl;
 				waitForCitiesListLoading();
 				setRandomLocation();
 				valid_response = true;
@@ -138,7 +147,8 @@ void WorldSoundscape::mainMenu() {
 			case KEY_U:
 			case KEY_u:
 				system("cls");
-				std::cout << "\n   U S E R   L O C A T I O N" << std::endl;
+				std::cout << "\n";
+				std::cout << std::left << std::setw(margin+2) << "" << "U S E R   L O C A T I O N" << std::endl;
 				setUserlocation();
 				valid_response = true;
 				break;
@@ -146,8 +156,18 @@ void WorldSoundscape::mainMenu() {
 			case KEY_E:
 			case KEY_e:
 				system("cls");
-				std::cout << "\n   E N T E R   L O C A T I O N" << std::endl;
+				std::cout << "\n";
+				std::cout << std::left << std::setw(margin+1) << "" << "E N T E R   L O C A T I O N" << std::endl;
 				setUserEnterLocation();
+				valid_response = true;
+				break;
+
+			case KEY_F:
+			case KEY_f:
+				system("cls");
+				std::cout << "\n";
+				std::cout << std::left << std::setw(margin -3) << "" << "F A V O U R I T E   L O C A T I O N S" << std::endl;
+				favouriteLocationsMenu();
 				valid_response = true;
 				break;
 
@@ -170,7 +190,8 @@ void WorldSoundscape::mainMenu() {
 		switch (option) {
 		case 0:
 			system("cls");
-			std::cout << "\n   R A N D O M   L O C A T I O N" << std::endl;
+			std::cout << "\n";
+			std::cout << std::left << std::setw(margin) << "" << "R A N D O M   L O C A T I O N" << std::endl;
 			waitForCitiesListLoading();
 			setRandomLocation();
 			valid_response = true;
@@ -178,19 +199,29 @@ void WorldSoundscape::mainMenu() {
 
 		case 1:
 			system("cls");
-			std::cout << "\n   U S E R   L O C A T I O N" << std::endl;
-			setUserlocation();
+			std::cout << "\n";
+			std::cout << std::left << std::setw(margin + 1) << "" << "E N T E R   L O C A T I O N" << std::endl;
+			setUserEnterLocation();
 			valid_response = true;
 			break;
 
 		case 2:
 			system("cls");
-			std::cout << "\n   E N T E R   L O C A T I O N" << std::endl;
-			setUserEnterLocation();
+			std::cout << "\n";
+			std::cout << std::left << std::setw(margin + 2) << "" << "U S E R   L O C A T I O N" << std::endl;
+			setUserlocation();
 			valid_response = true;
 			break;
 
 		case 3:
+			system("cls");
+			std::cout << "\n";
+			std::cout << std::left << std::setw(margin +1) << "" << "S A V E D   L O C A T I O N S" << std::endl;
+			favouriteLocationsMenu();
+			valid_response = true;
+			break;
+
+		case 4:
 			system("cls");
 			std::cout << "Exiting programm..." << std::endl;
 			stop_flag = true;
@@ -199,10 +230,77 @@ void WorldSoundscape::mainMenu() {
 			valid_response = true;
 			break;
 
-		default:
+		default:			
 			std::cout << "Error in option switch main menu" << std::endl;
+			break;
 		}
 	}
+}
+
+void WorldSoundscape::favouriteLocationsMenu(){
+	int capacity{ 50 };
+	int space(19);
+	int total_space(61);
+	int option = 0;
+	char key = ' ';
+	int margin{ 4 };
+
+	while (key != 13 || option >= Saved_Locations.size()) {
+		margin = 4;
+		system("cls");
+		std::cout << std::endl;
+		std::cout << std::setw(margin + 3) << "" << std::setw(space) << "City" << std::setw(space) << "Country" << std::setw(space / 1.7) << "Longitude" << "Latitude\n\n";
+		for (int i{ 0 }; i < Saved_Locations.size(); ++i) {
+			if (i > 9) margin = 3;			
+			std::cout << std::setw(margin) << "" << i + 1 << "[ ";
+			if (option == i) std::cout << "\033[1;30;47m";
+			std::cout << std::setw(space) << Saved_Locations.at(i).city << std::setw(space) << Saved_Locations.at(i).country_code << std::setw(space / 1.7) << Saved_Locations.at(i).lon << std::setw(9) << Saved_Locations.at(i).lat;
+			std::cout << "\033[0m" << " ]\n";
+			std::cout << "\033[0m";
+		}
+		for (int i{ 0 }; i < (capacity - Saved_Locations.size()); ++i) {
+			if ((i + Saved_Locations.size() + 1) > 9) margin = 3;			
+			std::cout << std::setw(margin) << "" << (i + Saved_Locations.size()) + 1; 
+			if (option == i + Saved_Locations.size()) std::cout << "\033[1;30;47m";
+			std::cout << std::setw(total_space) << "[ " << "]\n";
+			std::cout << "\033[0m";
+		}
+
+		key = _getch();
+		if (key == 0 || key == -32) {  // Arrow Keys first value
+			key = _getch();
+
+			switch (key) {
+			case 80:
+				option += 1;
+				option = option > capacity ? 0 : option;
+				break;
+			case 72:
+				option -= 1;
+				option = option < 0 ? capacity : option;
+				break;
+			default:
+				break;
+			}
+		}
+		if (key == 13 && option >= Saved_Locations.size()) { 
+			std::cout << "\033[1;31m \n";
+			std::cout << "   ERROR: empty block";
+			std::cout << "\033[0m";
+			std::this_thread::sleep_for(1s);
+		}
+	}
+
+	std::cout << std::endl << std::setw(27) << "" << "[loading...]" << std::endl;
+	weather.city_input = Saved_Locations.at(option).city;
+	weather.city = weather.city_input;
+	weather.whiteSpaceURLManager(weather.city);
+	weather.country_code = Saved_Locations.at(option).country_code;
+	if (Saved_Locations.at(option).state_code != "none") {
+		weather.state_code = Saved_Locations.at(option).state_code;
+	}
+	weather.callAllAPIs();
+	updateScale();
 }
 
 void WorldSoundscape::initMusic() {
@@ -226,8 +324,9 @@ void WorldSoundscape::setUserEnterLocation(){
 	std::getline(std::cin, weather.country_code);
 
 	if (weather.country_code == "US") {
-		std::cout << "Please enter the state code for more accuracy, type \"none\" if not needed: ";
+		std::cout << "Enter the state code for more accuracy if needed or press enter: ";
 		std::getline(std::cin, weather.state_code);
+		if (weather.state_code.size() == 0) weather.state_code = "none";
 	}
 	else {
 		weather.state_code = "none";

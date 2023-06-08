@@ -1,6 +1,3 @@
-#ignore all .txt files
-*.txt
-
 #ignore all .xlsx files
 *.xlsx
 
