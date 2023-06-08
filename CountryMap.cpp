@@ -236,6 +236,7 @@ std::map<std::string, std::string> createCountryMap() {
 	countryMap["UA"] = "Ukraine";
 	countryMap["AE"] = "United Arab Emirates";
 	countryMap["GB"] = "United Kingdom";
+	countryMap["UK"] = "United Kingdom";
 	countryMap["US"] = "United States";
 	countryMap["UM"] = "United States Minor Outlying Islands";
 	countryMap["UY"] = "Uruguay";
