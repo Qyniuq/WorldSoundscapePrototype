@@ -300,10 +300,10 @@ void Weather::display() {
     std::cout << std::setw(length - (14 + city_time.length())) << "" << "Current time: " << city_time << "\n";
     std::cout << std::setfill('-') << std::setw(length) << "" << std::setfill(' ') << "\n";
 
-    std::cout << "Open Weather calls: "  << std::setw(31) << open_weather_call_count << "[E] Enter Location" << std::endl;
-    std::cout << std::left << "Sunrise Sunset calls: " << std::setw(29) << sunrise_sunset_call_count  << "[R] Random Location" << std::endl;
-    std::cout << std::left << "USNO calls: " << std::setw(39) << USNO_call_count << "[U] User Location" << std::endl;
-    std::cout << std::left << "GeoPlugin calls: " << std::setw(34) << geoPLUGIN_call_count << "[Q] Quit" << std::endl;
+    std::cout << "Open Weather calls: "  << std::setw(13) << open_weather_call_count << std::setw(20) << "[E] Enter Location" << "[S] Save Location" << std::endl;
+    std::cout << std::left << "Sunrise Sunset calls: " << std::setw(11) << sunrise_sunset_call_count << std::setw(20) << "[R] Random Location" << "[L] Load Location" << std::endl;
+    std::cout << std::left << "USNO calls: " << std::setw(21) << USNO_call_count << std::setw(20) << "[U] User Location" << "[P] Pause" << std::endl;
+    std::cout << std::left << "GeoPlugin calls: " << std::setw(16) << geoPLUGIN_call_count << std::setw(20) << "[M] Main Menu" << "[Q] Quit" << std::endl;
 }
 
 void Weather::setCity(std::string city_input, std::string country_code_input) {

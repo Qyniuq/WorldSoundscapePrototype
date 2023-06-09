@@ -1,0 +1,9 @@
+Madrid/ES/Spain/none=-3.7026/40.4165
+Qaanaaq/GL/Greenland/none=-69.3632/77.484
+New York/US/United States/NY=-74.006/40.7143
+Gelarpadang/ID/Indonesia/none=106.942/-7.2473
+Banbury/GB/United Kingdom/none=-1.3403/52.0602
+Urumita/CO/Colombia/none=-73.0123/10.5589
+Carlanstown/IE/Ireland/none=-6.8394/53.7578
+Alovera/ES/Spain/none=-3.2453/40.5937
+Yebra/ES/Spain/none=-2.9663/40.357
