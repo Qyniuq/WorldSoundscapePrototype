@@ -520,8 +520,15 @@ void WorldSoundscape::displayWeather(Weather& weather, std::vector<std::string>&
 			system("CLS");
 			weather.display();
 			std::cout << "\n";
-			for (auto& n : notes_played)
-				std::cout << n << " ";
+			try {
+				for (auto& n : notes_played)
+					std::cout << n << " ";
+			}
+			catch (...) {
+				system("cls");
+				std::cerr << "Exception in display weather thread.\n";
+				std::this_thread::sleep_for(3600s);
+			}
 			last_display_time = std::chrono::steady_clock::now();
 		}
 		shmtx.unlock();
@@ -589,11 +596,10 @@ void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::
 		std::cout << instrument.sounds[mode[r]].sharp_name << " ";
 		try {
 			notes_played.push_back(instrument.sounds[mode[r]].sharp_name);
-		} catch (std::exception &e) { 
-			update_mtx.lock();
-			std::cerr << "exception caught: " << e.what() << std::endl; 
+		} catch (...) { 
+			system("cls");
+			std::cerr << "exception in play notes thread.\n";
 			std::this_thread::sleep_for(3600s);
-			update_mtx.unlock();
 		}
 		sh_lock.unlock();
 		update_lock.unlock();
@@ -627,7 +633,6 @@ void WorldSoundscape::keyboard_listener() {
 		case KEY_m:			
 			update_mtx.lock();
 			system("cls");
-			std::cout << "Back to menu..." << std::endl;
 			cv.notify_all();
 			stop_flag = true;
 			startMusic = false;
