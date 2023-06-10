@@ -7,16 +7,13 @@ class Instrument
 {
 private:
 	ALuint effectSlot;
-
 	std::vector<int> octaves;
-
 	std::string folder_direction;
 
 public:
 	
 	int min;
 	int max;
-
 	int sleep_value;
 
 	std::map <int, Sound> sounds;

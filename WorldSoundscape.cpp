@@ -303,17 +303,10 @@ std::string reduceString(std::string s, int n) {
 
 void WorldSoundscape::pauseMenu() {
 	update_mtx.lock();
+	std::cout << "\nPaused, press \"P\" to continue...";
 	char key = ' ';
 	while (key != KEY_P && key != KEY_p) {
 		key = _getch();
-		switch (key) {
-		case KEY_P:
-		case KEY_p:
-			std::cout << "\nResumed!";
-			break;
-		default:
-			break;
-		}
 	}
 	update_mtx.unlock();
 }
@@ -419,7 +412,7 @@ void WorldSoundscape::favouriteLocationsMenu(){
 		weather.whiteSpaceURLManager(weather.city);
 		weather.country_code = Saved_Locations.at(option).country_code;
 		weather.state_code = Saved_Locations.at(option).state_code;
-	
+		weather.user_location = false;
 		weather.callAllAPIs();
 		updateScale();
 	}
@@ -433,7 +426,7 @@ void WorldSoundscape::saveLocation()
 		if (l == weather)
 			found = true;
 	}
-	if (!found) {
+	if (!found && Saved_Locations.size() < 26) {
 		Location new_location = weather;
 		Saved_Locations.push_back(new_location);
 	}
@@ -450,6 +443,7 @@ void WorldSoundscape::initMusic() {
 
 void WorldSoundscape::enterLocationMenu(){
 	update_mtx.lock();
+	cv.notify_all();
 	stop_flag = false;
 	system("cls");
 	std::cout << "\nPlease enter the city name: ";
@@ -556,11 +550,23 @@ void WorldSoundscape::updateWeather(Weather& weather) {
 	}
 }
 
+int rnd_gen(int min, int max){
+	std::random_device rd;
+	std::mt19937 gen {rd()};
+	std::uniform_int_distribution d(min, max);
+
+	return d(gen);
+}
+
 void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::vector<std::string>& notes_played) {
 	srand(time(0));
 	std::this_thread::sleep_for(1s);
 	std::vector<notes> mode = getMode(instrument);
-	int r = rand() % mode.size();
+	//int r = rand() % mode.size();
+	std::random_device rd;
+	std::mt19937 gen {rd()};
+	std::uniform_int_distribution d(0, 10000);
+	int r = d(gen) % mode.size();
 	std::mutex mtx;
 
 	while (!stop_flag) {
@@ -576,25 +582,30 @@ void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::
 		shmtx.unlock();
 		std::shared_lock update_lock(update_mtx);
 		mode = getMode(instrument);
-		r = rand() % mode.size();
+		//r = rand() % mode.size();
+		r = d(gen) % mode.size();
 		instrument.sounds[mode[r]].play();
 		std::shared_lock sh_lock(shmtx);
 		std::cout << instrument.sounds[mode[r]].sharp_name << " ";
 		try {
 			notes_played.push_back(instrument.sounds[mode[r]].sharp_name);
 		} catch (std::exception &e) { 
+			update_mtx.lock();
 			std::cerr << "exception caught: " << e.what() << std::endl; 
-			std::this_thread::sleep_for(10s);
+			std::this_thread::sleep_for(3600s);
+			update_mtx.unlock();
 		}
 		sh_lock.unlock();
 		update_lock.unlock();
 
 		int sleep_time;
 		if (weather.wind_speed != 0) {
-			sleep_time = static_cast<int>((rand() % instrument.sleep_value) / (weather.wind_speed / 1.7));
+			//sleep_time = static_cast<int>((rand() % instrument.sleep_value) / (weather.wind_speed / 1.7));
+			sleep_time = static_cast<int>((d(gen) % instrument.sleep_value) / (weather.wind_speed / 1.7));
 		}
 		else {
-			sleep_time = static_cast<int>((rand() % instrument.sleep_value) + 1000);
+			//sleep_time = static_cast<int>((rand() % instrument.sleep_value) + 1000);
+			sleep_time = static_cast<int>((d(gen) % instrument.sleep_value) + 1000);
 		}
 		cv.wait_for(lock, std::chrono::milliseconds(sleep_time));
 	}

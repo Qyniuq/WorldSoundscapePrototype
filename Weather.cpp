@@ -242,6 +242,7 @@ void Weather::updateOpenWeatherData() {
     setWeather();
     lon = getDoubleSubData("coord", "lon");
     lat = getDoubleSubData("coord", "lat");
+    city_input = getStringData("name");
     timezone = getIntData("timezone");
     time_offset = convertUTCtimeToString(timezone);
     visibility = getIntData("visibility");
@@ -583,13 +584,13 @@ bool Weather::data_is_wrong(int& day_offset) {
     int day_length = 86400;
     time_t current_UTC_time = time(0);
 
-    Time sunrise_time(getStringSubData("results", "sunrise"), *this);
+    Time solar_noon(getStringSubData("results", "solar_noon"), *this);
 
-    if ((sunrise_time.utc_sec - current_UTC_time) > day_length) {
+    if ((solar_noon.utc_sec - current_UTC_time) > day_length) {
         day_offset = -1;
         return true;
     }
-    else if (((sunrise_time.utc_sec - current_UTC_time) < -day_length) && sunrise.utc_sec != 0) {
+    else if ((solar_noon.utc_sec - current_UTC_time) < -day_length) {
         day_offset = 1;
         return true;
     }
