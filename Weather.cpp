@@ -300,9 +300,10 @@ void Weather::display() {
     std::cout << "Latitude: " << lat << " / " << "Longitude: " << lon << "\n";
     std::cout << "Points: " << points << "\nScale: " << tonality << " " << scale << "\n";
 
-    if (No_Conexion) std::cout << "\033[1;31m" << "Error: couldn't establish connetion\n" << "\033[0m";
+    if (No_Conexion) std::cout << "\033[1;31m" << "Error: couldn't establish connection\n" << "\033[0m";
     if (No_ApiCode) std::cout << "\033[1;31m" << "Error: couldn't find apicode.txt\n" <<"\033[0m";
     if (No_Saved_Locations) std::cout << "\033[1;31m" << "Error: couldn't find saved_locations.txt\n"<<"\033[0m";
+    if (No_Location_Found) std::cout << "\033[1;31m" << "Error: location not found, try another one\n" << "\033[0m";
 
     std::cout << std::right << std::setw(length) << day_light_status << std::left << "\n";
     std::cout << std::setw(length - (14 + city_time.length())) << "" << "Current time: " << city_time << "\n";
@@ -383,6 +384,7 @@ struct tm Weather::timeToStructTM(time_t t) {
 
 void Weather::setWeather() {
     if (doc.HasMember("weather") && doc["weather"].IsArray() && !doc["weather"].Empty()) {
+        No_Location_Found = false;
         rapidjson::Value& weather_array = doc["weather"];
         if (weather_array[0].HasMember("main") && weather_array[0]["main"].IsString()) {
             weather_main = weather_array[0]["main"].GetString();
@@ -391,8 +393,9 @@ void Weather::setWeather() {
         if (weather_array[0].HasMember("description") && weather_array[0]["description"].IsString()) {
             weather_description = weather_array[0]["description"].GetString();
         }
-    } else
-        std::cout << "ERROR: No conexion stablished\n";
+    }
+    else
+        No_Location_Found = true;
 }
 
 std::string Weather::getStringData(const std::string& data) {
@@ -401,7 +404,7 @@ std::string Weather::getStringData(const std::string& data) {
         result = doc[data.c_str()].GetString();
     }
     else {
-        std::cerr << "ERROR: No " << data << " was found\n";
+       // std::cerr << "ERROR: No " << data << " was found\n";
     }
     return result;
 }
@@ -415,11 +418,11 @@ std::string Weather::getStringSubData(const std::string& main, const std::string
             result = main_obj[subdata.c_str()].GetString();
         }
         else {
-            std::cerr << "ERROR: No " << subdata << " was found\n";
+           // std::cerr << "ERROR: No " << subdata << " was found\n";
         }
     }
     else {
-        std::cerr << "ERROR: No " << subdata << " was found\n";
+      //  std::cerr << "ERROR: No " << subdata << " was found\n";
     }
     return result;
 }
@@ -429,7 +432,7 @@ int Weather::getIntData(const std::string& input) {
     if (doc.HasMember(input.c_str()) && doc[input.c_str()].IsInt())
         result = doc[input.c_str()].GetInt();
     else {
-        std::cerr << "ERROR: No " << input << " was found\n";
+      //  std::cerr << "ERROR: No " << input << " was found\n";
     }
     return result;
 }
@@ -443,9 +446,9 @@ int Weather::getIntSubData(const std::string& main, const std::string& subdata) 
         if (obj.HasMember(subdata.c_str()) && obj[subdata.c_str()].IsInt()) {
             data = (obj[subdata.c_str()].GetInt());
         }
-        else { std::cerr << "ERROR: No " << subdata << " was found\n"; }
+      //  else { std::cerr << "ERROR: No " << subdata << " was found\n"; }
     }
-    else { std::cerr << "ERROR: No " << main << " was found\n"; }
+  //  else { std::cerr << "ERROR: No " << main << " was found\n"; }
     return data;
 }
 
@@ -459,7 +462,7 @@ double Weather::getDoubleData(const std::string& input) {
         result = static_cast<double>((doc[input.c_str()].GetInt()));
     }
     else {
-        std::cerr << "ERROR: No " << input << " was found\n";
+     //   std::cerr << "ERROR: No " << input << " was found\n";
     }
     return result;
 }
@@ -475,7 +478,7 @@ double Weather::getDoubleSubData(const std::string& main, const std::string& sub
         else if (obj.HasMember(subdata.c_str()) && obj[subdata.c_str()].IsInt()) {
             data = static_cast<double>((obj[subdata.c_str()].GetInt()));
         }
-        else { std::cerr << "ERROR: No " << subdata << " was found\n"; }
+      //  else { std::cerr << "ERROR: No " << subdata << " was found\n"; }
     }
     return data;
 }

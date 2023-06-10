@@ -49,6 +49,7 @@ public:
     bool No_Conexion {false};
     bool No_ApiCode{ false };
     bool No_Saved_Locations{ false };
+    bool No_Location_Found{ false };
 
     rapidjson::Document cities;
     std::string city;

@@ -62,12 +62,10 @@ private:
 	std::vector<Location> Saved_Locations;
 
 public:
-	bool ERROR_No_Saved_Locations_File{false};
-	bool ERROR_No_Conexion{ false };
-	bool ERROR_No_ApiCode{ false };
 	Weather weather;
-	bool startMusic{ false };
-	bool exit_World_Soundscape {false};
+	bool startMusic{false};
+	bool exit_World_Soundscape{false};
+	bool saved_locations_has_been_changed{false};
 	WorldSoundscape();
 	~WorldSoundscape();
 	void setRandomLocation();
@@ -77,6 +75,7 @@ public:
 	void mainMenu();
 	void pauseMenu();
 	void favouriteLocationsMenu();
+	void infoMenu();
 	void saveLocation();
 	void loadSavedLocations();
 	void saveChangesInSavedLocations();

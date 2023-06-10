@@ -10,4 +10,4 @@ Atuona/PF/French Polynesia/none/-139.033/-9.8
 Grytviken/GS/South Georgia and the South Sandwich Islands/none/-36.5092/-54.2811
 Waitangi/NZ/New Zealand/none/-176.56/-43.9535
 Barrow/US/United States/none/-156.789/71.2906
-Isachsen/CA/Canada/none/-103.505/78.7853
+Trippstadt/DE/Germany/none/7.7748/49.3593
