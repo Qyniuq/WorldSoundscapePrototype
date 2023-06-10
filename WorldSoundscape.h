@@ -46,6 +46,7 @@ class WorldSoundscape
 {
 private:
 	bool paused {false};
+	std::mutex push_back_mtx;
 	std::shared_mutex shmtx;
 	std::shared_mutex update_mtx;
 	std::atomic<bool> random_location_update{ false };

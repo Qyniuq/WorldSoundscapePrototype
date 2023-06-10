@@ -138,7 +138,7 @@ void WorldSoundscape::saveChangesInSavedLocations() {
 void WorldSoundscape::waitForCitiesListLoading() {
 
 	if (weather.cities.IsNull()) {
-		std::cout << std::endl << std::setw(27) << "" << "[loading...]" << std::endl;
+		std::cout << std::endl << std::setw(27) << "" << "loading [...]" << std::endl;
 		while (weather.cities.IsNull())
 			std::this_thread::sleep_for(100ms);
 	}
@@ -405,7 +405,7 @@ void WorldSoundscape::favouriteLocationsMenu(){
 	}
 
 	if (!back) {
-		std::cout << std::endl << std::setw(27) << "" << "[loading...]" << std::endl;
+		std::cout << std::endl << std::setw(27) << "" << "loading [...]" << std::endl;
 		weather.city_input = Saved_Locations.at(option).city;
 		weather.city = weather.city_input;
 		weather.whiteSpaceURLManager(weather.city);
@@ -537,9 +537,7 @@ void WorldSoundscape::displayWeather(Weather& weather, std::vector<std::string>&
 }
 
 void WorldSoundscape::updateWeather(Weather& weather) {
-	std::mutex mtx;
 	while (!stop_flag) {
-		std::unique_lock<std::mutex> lock(mtx);
 		float reverbGain = static_cast<float>(weather.humidity) / 100.0f;
 		alEffectf(reverbEffect, AL_EAXREVERB_GAIN, reverbGain);
 		alAuxiliaryEffectSloti(reverbEffectSlot, AL_EFFECTSLOT_EFFECT, reverbEffect);
@@ -581,7 +579,10 @@ void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::
 			try {
 				notes_played.clear();
 			}
-			catch (...) { std::cerr << "exception in clear vector.\n";}
+			catch (...) { 
+				std::cerr << "exception in clear vector.\n";
+				std::this_thread::sleep_for(3600s);
+			}
 			
 		}
 		shmtx.unlock();
@@ -591,9 +592,12 @@ void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::
 		r = d(gen) % mode.size();
 		instrument.sounds[mode[r]].play();
 		std::shared_lock sh_lock(shmtx);
+		if (!stop_flag)
 		std::cout << instrument.sounds[mode[r]].sharp_name << " ";
 		try {
+			push_back_mtx.lock();
 			notes_played.push_back(instrument.sounds[mode[r]].sharp_name);
+			push_back_mtx.unlock();
 		} catch (...) { 
 			system("cls");
 			std::cerr << "exception in play notes thread.\n";
@@ -601,6 +605,7 @@ void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::
 		}
 		sh_lock.unlock();
 		update_lock.unlock();
+		
 
 		int sleep_time;
 		if (weather.wind_speed != 0) {
@@ -631,6 +636,7 @@ void WorldSoundscape::keyboard_listener() {
 		case KEY_m:			
 			update_mtx.lock();
 			system("cls");
+			std::cout << std::endl << std::setw(27) << "" << "loading [...]" << std::endl;
 			cv.notify_all();
 			stop_flag = true;
 			startMusic = false;

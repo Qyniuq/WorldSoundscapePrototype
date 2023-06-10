@@ -13,7 +13,7 @@ nautical_dawn{ 0, *this }, nautical_dusk{ 0, *this }, astronomical_dawn{ 0, *thi
 {
     in_file.open("apicode.txt");
     if (!in_file) {
-        std::cerr << "apicode.txt not found" << std::endl;
+       // std::cerr << "apicode.txt not found" << std::endl;
         No_ApiCode = true;
     }
     else {
@@ -56,7 +56,7 @@ void Weather::callAPI(std::string URL, APIs API) {
     res = curl_easy_perform(curl); //calls the API
     if (res != CURLE_OK) {
         No_Conexion = true;
-        std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
+       // std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
     }
     else {
         doc.Parse(chunk.memory);

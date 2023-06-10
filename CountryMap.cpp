@@ -262,5 +262,5 @@ std::string getCountryName(const std::map<std::string, std::string> &map, const 
 	if (it != map.end()) {
 		return it->second;
 	}
-	return "no country name found";
+	return "Unknown";
 }
