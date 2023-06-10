@@ -46,6 +46,10 @@ private:
     int day_offset;
 
 public:
+    bool No_Conexion {false};
+    bool No_ApiCode{ false };
+    bool No_Saved_Locations{ false };
+
     rapidjson::Document cities;
     std::string city;
     std::string state_code;

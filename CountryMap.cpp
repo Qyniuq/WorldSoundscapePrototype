@@ -4,6 +4,7 @@ std::map<std::string, std::string> createCountryMap() {
 
 	std::map<std::string, std::string> countryMap;
 
+	countryMap["Unknown"] = "Unknown";
 	countryMap["AF"] = "Afghanistan";
 	countryMap["AX"] = "Åland Islands";
 	countryMap["AL"] = "Albania";

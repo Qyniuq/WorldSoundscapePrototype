@@ -68,42 +68,7 @@ WorldSoundscape::WorldSoundscape() : weather{ false, "none", "none", "none" } {
 
 	alAuxiliaryEffectSloti(reverbEffectSlot, AL_EFFECTSLOT_EFFECT, reverbEffect);
 
-	std::ifstream file("saved_locations.txt");
-	if (!file) {
-		std::cerr << "saved_locations.txt not found";
-		ERROR_No_Saved_Locations_File = true;
-	}
-	else {
-		std::string line;
-		while (std::getline(file, line)) {
-			auto it = std::find(line.begin(), line.end(), '/');
-			std::string city (line.begin(), it);
-			line.erase(line.begin(), it + 1);
-
-			it = std::find(line.begin(), line.end(), '/');
-			std::string country_code(line.begin(), it);
-			line.erase(line.begin(), it + 1);
-
-			it = std::find(line.begin(), line.end(), '/');
-			std::string country(line.begin(), it);
-			line.erase(line.begin(), it + 1);
-
-			it = std::find(line.begin(), line.end(), '=');
-			std::string state_code(line.begin(), it);
-			line.erase(line.begin(), it + 1);
-
-			it = std::find(line.begin(), line.end(), '/');
-			std::string temp(line.begin(), it);
-			double lon = std::stod(temp);
-			line.erase(line.begin(), it + 1);
-
-			std::string temp2(line.begin(), line.end());
-			double lat = std::stod(temp2);
-
-			Saved_Locations.emplace_back(Location(city, country_code, country, state_code, lon, lat));
-		}
-	}
-
+	loadSavedLocations();
 	std::thread loadCitiesThread([this]() { weather.loadCitiesList(); });
 	loadCitiesThread.detach();
 	std::future<Instrument> jaguar_f = std::async(std::launch::async, CreateJaguarGuitar, reverbEffectSlot);
@@ -122,17 +87,51 @@ WorldSoundscape::~WorldSoundscape()
 	alcCloseDevice(device);
 }
 
+void WorldSoundscape::loadSavedLocations() {
+	std::ifstream file("saved_locations.txt");
+	if (!file) {
+		std::cerr << "saved_locations.txt not found";
+		ERROR_No_Saved_Locations_File = true;
+		weather.No_Saved_Locations = true;
+	}
+	else {
+		ERROR_No_Saved_Locations_File = false;
+		weather.No_Saved_Locations = false;
+		std::string line;
+
+		auto lambdaget = [](std::string& line) {
+			auto it = std::find(line.begin(), line.end(), '/');
+			std::string result(line.begin(), it);
+			line.erase(line.begin(), it + 1);
+			return result;
+		};
+		while (std::getline(file, line)) {
+			
+			std::string city = lambdaget(line);
+			std::string country_code = lambdaget(line);
+			std::string country = lambdaget(line);
+			std::string state_code = lambdaget(line);
+			std::string temp = lambdaget(line);
+			double lon = std::stod(temp);
+			std::string temp2(line.begin(), line.end());
+			double lat = std::stod(temp2);
+
+			Saved_Locations.emplace_back(Location(city, country_code, country, state_code, lon, lat));
+		}
+	}
+}
+
 void WorldSoundscape::saveChangesInSavedLocations() {
 	std::ofstream file("saved_locations.txt");
 	if (file.is_open()) {
 		for (auto l : Saved_Locations) {
-			file << l.city << "/" << l.country_code << "/" << l.country << "/" << l.state_code << "=" << l.lon << "/" << l.lat << std::endl;
+			file << l.city << "/" << l.country_code << "/" << l.country << "/" << l.state_code << "/" << l.lon << "/" << l.lat << std::endl;
 		}
 		file.close();
 		std::cout << "Locations saved successfully." << std::endl;
 	}
 	else {
-		std::cout << "Failed to open saced_locations.txt" << std::endl;
+		std::cout << "Failed to save saved_locations.txt" << std::endl;
 	}
 }
 
@@ -567,7 +566,6 @@ int rnd_gen(int min, int max){
 
 void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::vector<std::string>& notes_played) {
 	srand(time(0));
-	std::this_thread::sleep_for(1s);
 	std::vector<notes> mode = getMode(instrument);
 	//int r = rand() % mode.size();
 	std::random_device rd;
@@ -583,7 +581,7 @@ void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::
 			try {
 				notes_played.clear();
 			}
-			catch (std::exception& e) { std::cerr << "exception caught: " << e.what() << std::endl;}
+			catch (...) { std::cerr << "exception in clear vector.\n";}
 			
 		}
 		shmtx.unlock();

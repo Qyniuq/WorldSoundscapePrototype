@@ -1,13 +1,13 @@
-Qaanaaq/GL/Greenland/none=-69.3632/77.484
-New York/US/United States/NY=-74.006/40.7143
-Carlanstown/IE/Ireland/none=-6.8394/53.7578
-Alovera/ES/Spain/none=-3.2453/40.5937
-Yebra/ES/Spain/none=-2.9663/40.357
-McMurdo Station/AQ/Antarctica/none=168.223/-77.6554
-Puerto Williams/CL/Chile/none=-67.6167/-54.9333
-Auckland/NZ/New Zealand/none=174.767/-36.8667
-Atuona/PF/French Polynesia/none=-139.033/-9.8
-Grytviken/GS/South Georgia and the South Sandwich Islands/none=-36.5092/-54.2811
-Waitangi/NZ/New Zealand/none=-176.56/-43.9535
-Barrow/US/United States/none=-156.789/71.2906
-Isachsen/CA/Canada/none=-103.505/78.7853
+Qaanaaq/GL/Greenland/none/-69.3632/77.484
+New York/US/United States/NY/-74.006/40.7143
+Carlanstown/IE/Ireland/none/-6.8394/53.7578
+Alovera/ES/Spain/none/-3.2453/40.5937
+Yebra/ES/Spain/none/-2.9663/40.357
+McMurdo Station/AQ/Antarctica/none/168.223/-77.6554
+Puerto Williams/CL/Chile/none/-67.6167/-54.9333
+Auckland/NZ/New Zealand/none/174.767/-36.8667
+Atuona/PF/French Polynesia/none/-139.033/-9.8
+Grytviken/GS/South Georgia and the South Sandwich Islands/none/-36.5092/-54.2811
+Waitangi/NZ/New Zealand/none/-176.56/-43.9535
+Barrow/US/United States/none/-156.789/71.2906
+Isachsen/CA/Canada/none/-103.505/78.7853

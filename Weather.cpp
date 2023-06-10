@@ -14,8 +14,10 @@ nautical_dawn{ 0, *this }, nautical_dusk{ 0, *this }, astronomical_dawn{ 0, *thi
     in_file.open("apicode.txt");
     if (!in_file) {
         std::cerr << "apicode.txt not found" << std::endl;
+        No_ApiCode = true;
     }
     else {
+        No_ApiCode = false;
         std::getline(in_file, api_key);
     }
     in_file.close();
@@ -53,11 +55,12 @@ void Weather::callAPI(std::string URL, APIs API) {
 
     res = curl_easy_perform(curl); //calls the API
     if (res != CURLE_OK) {
+        No_Conexion = true;
         std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
     }
     else {
         doc.Parse(chunk.memory);
-
+        No_Conexion = false;
         if (!doc.IsNull()) {
             switch (API) {
             case APIs::geoPLUGIN:
@@ -293,10 +296,14 @@ void Weather::display() {
     std::cout << "Civil dusk ends at: " << civil_dusk.local_str << "\n";
     std::cout << "Nautical dusk ends at: " << nautical_dusk.local_str << "\n";
     std::cout << "Astronomical dusk ends at: " << astronomical_dusk.local_str << "\n";
-
     std::cout << "Moon phase: " << moon_phase; if (moon_fracillum != "none") std::cout << " " << moon_fracillum << "\n";
     std::cout << "Latitude: " << lat << " / " << "Longitude: " << lon << "\n";
     std::cout << "Points: " << points << "\nScale: " << tonality << " " << scale << "\n";
+
+    if (No_Conexion) std::cout << "\033[1;31m" << "Error: couldn't establish connetion\n" << "\033[0m";
+    if (No_ApiCode) std::cout << "\033[1;31m" << "Error: couldn't find apicode.txt\n" <<"\033[0m";
+    if (No_Saved_Locations) std::cout << "\033[1;31m" << "Error: couldn't find saved_locations.txt\n"<<"\033[0m";
+
     std::cout << std::right << std::setw(length) << day_light_status << std::left << "\n";
     std::cout << std::setw(length - (14 + city_time.length())) << "" << "Current time: " << city_time << "\n";
     std::cout << std::setfill('-') << std::setw(length) << "" << std::setfill(' ') << "\n";
@@ -389,7 +396,7 @@ void Weather::setWeather() {
 }
 
 std::string Weather::getStringData(const std::string& data) {
-    std::string result{ "none" };
+    std::string result{ "Unknown" };
     if (doc.HasMember(data.c_str()) && doc[data.c_str()].IsString()) {
         result = doc[data.c_str()].GetString();
     }
@@ -400,7 +407,7 @@ std::string Weather::getStringData(const std::string& data) {
 }
 
 std::string Weather::getStringSubData(const std::string& main, const std::string& subdata) {
-    std::string result{ "none" };
+    std::string result{ "Unknown" };
     if (doc.HasMember(main.c_str()) && doc[main.c_str()].IsObject()) {
         rapidjson::Value& main_obj = doc[main.c_str()];
 

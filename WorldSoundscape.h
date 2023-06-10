@@ -77,6 +77,7 @@ public:
 	void pauseMenu();
 	void favouriteLocationsMenu();
 	void saveLocation();
+	void loadSavedLocations();
 	void saveChangesInSavedLocations();
 	void displayWeather(Weather& weather, std::vector<std::string>& notes_played);
 	void updateWeather(Weather& weather);
