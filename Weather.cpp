@@ -274,8 +274,8 @@ void Weather::display() {
     std::cout << std::setfill('-') << std::setw(length) << "" << std::setfill(' ') << "\n";
 
     std::cout << "Temperature: ";
-    if (temperature != 0) std::cout << temperature - 273.15 << "\370C / ";
-    if (feels_like != 0) std::cout << "feels like " << feels_like - 273.15 << "\370C";
+    if (temperature != 0) std::cout << temperature - 273.15 << "\xC2\xB0" << "C / ";
+    if (feels_like != 0) std::cout << "feels like " << feels_like - 273.15 << "\xC2\xB0" << "C";
     std::cout << "\nWeather: " << weather_main;
     std::cout << " / " << weather_description << "\n";
     std::cout << "Wind speed: " << wind_speed * 3.6 << " km/h\n";

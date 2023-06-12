@@ -6,7 +6,7 @@ std::map<std::string, std::string> createCountryMap() {
 
 	countryMap["Unknown"] = "Unknown";
 	countryMap["AF"] = "Afghanistan";
-	countryMap["AX"] = "Åland Islands";
+	countryMap["AX"] = "\xC3\x85land Islands";
 	countryMap["AL"] = "Albania";
 	countryMap["DZ"] = "Algeria";
 	countryMap["AS"] = "American Samoa";
@@ -58,7 +58,7 @@ std::map<std::string, std::string> createCountryMap() {
 	countryMap["CD"] = "Congo, Democratic Republic of the";
 	countryMap["CK"] = "Cook Islands";
 	countryMap["CR"] = "Costa Rica";
-	countryMap["CI"] = "Côte d'Ivoire";
+	countryMap["CI"] = "C\xC3\xb4te d'Ivoire";
 	countryMap["HR"] = "Croatia";
 	countryMap["CU"] = "Cuba";
 	countryMap["CY"] = "Cyprus";
@@ -184,7 +184,7 @@ std::map<std::string, std::string> createCountryMap() {
 	countryMap["PT"] = "Portugal";
 	countryMap["PR"] = "Puerto Rico";
 	countryMap["QA"] = "Qatar";
-	countryMap["RE"] = "Réunion";
+	countryMap["RE"] = "R\xC3\xA9union";
 	countryMap["RO"] = "Romania";
 	countryMap["RU"] = "Russia";
 	countryMap["RW"] = "Rwanda";

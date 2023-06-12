@@ -1,13 +1,21 @@
-Qaanaaq/GL/Greenland/none/-69.3632/77.484
-New York/US/United States/NY/-74.006/40.7143
-Carlanstown/IE/Ireland/none/-6.8394/53.7578
-Alovera/ES/Spain/none/-3.2453/40.5937
-Yebra/ES/Spain/none/-2.9663/40.357
-McMurdo Station/AQ/Antarctica/none/168.223/-77.6554
-Puerto Williams/CL/Chile/none/-67.6167/-54.9333
-Auckland/NZ/New Zealand/none/174.767/-36.8667
-Atuona/PF/French Polynesia/none/-139.033/-9.8
-Grytviken/GS/South Georgia and the South Sandwich Islands/none/-36.5092/-54.2811
-Waitangi/NZ/New Zealand/none/-176.56/-43.9535
-Barrow/US/United States/none/-156.789/71.2906
-Trippstadt/DE/Germany/none/7.7748/49.3593
+Tardáguila/ES/Spain/none/-5.5742/41.1149
+Bjørnevatn/NO/Norway/none/29.9847/69.6672
+Mouhijärvi/FI/Finland/none/23.0167/61.5
+Århus Kommune/DK/Denmark/none/10.169/56.1632
+Piteå/SE/Sweden/none/21.4794/65.3172
+Strâmtura/RO/Romania/none/24.1333/47.7833
+Cabaços/PT/Portugal/none/-7.5759/41.0139
+Gouveia (São Simão)/PT/Portugal/none/-8.0495/41.2136
+Raach am Hochgebirge/AT/Austria/none/15.9333/47.6333
+Malé Svatoňovice/CZ/Czech Republic/none/16.0498/50.534
+Mali Lošinj/HR/Croatia/none/14.4686/44.5306
+Dayr Ballūţ/PS/Palestinian Territory, Occupied/none/35.0245/32.0655
+Khersons’ka Oblast’/UA/Ukraine/none/34/46.5
+Łomża County/PL/Poland/none/22.0603/53.2083
+Nußloch/DE/Germany/none/8.6956/49.3239
+Bağlıca/TR/Turkey/none/40.685/37.5272
+Tølløse/DK/Denmark/none/11.7703/55.6125
+Varāmīn/IR/Iran, Islamic Republic of/none/51.6457/35.3242
+Beaumont-sur-Lèze/FR/France/none/1.3583/43.381
+Şalākhid/SY/Syrian Arab Republic/none/36.5727/32.8727
+Hwangju-ŭp/KP/Korea, Democratic People's Republic of/none/125.776/38.6703
