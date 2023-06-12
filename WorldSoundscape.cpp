@@ -93,7 +93,7 @@ WorldSoundscape::~WorldSoundscape()
 	alcDestroyContext(context);
 	alcCloseDevice(device);
 
-	std::cout << "         Thank you for using World Sound :)\n";
+	std::cout << "         Thanks for using World Sound :)\n";
 	std::this_thread::sleep_for(1s);
 }
 
