@@ -56,6 +56,28 @@ struct Location {
 	}
 };
 
+struct note_played {
+private:
+	std::string note;
+	std::string color;
+public:
+	note_played(std::string n, instrument_type instrument) : note{ n }
+	{
+		switch (instrument) {
+		case JaguarGuitar:
+			color = "\033[1;33m";
+			break;
+		case FemaleVoice:
+			color = "\033[1;36m";
+			break;
+		}
+	}
+	friend std::ostream& operator<<(std::ostream& os, note_played& n) {
+		os << n.color << n.note << "\033[0m";
+		return os;
+	}
+};
+
 class WorldSoundscape
 {
 private:
@@ -77,6 +99,7 @@ private:
 
 public:
 	Weather weather;
+	bool stop_display{ false };
 	bool startMusic{false};
 	bool exit_World_Soundscape{false};
 	bool saved_locations_has_been_changed{false};
@@ -93,11 +116,11 @@ public:
 	void saveLocation();
 	void loadSavedLocations();
 	void saveChangesInSavedLocations();
-	void displayWeather(Weather& weather, std::vector<std::string>& notes_played);
+	void displayWeather(Weather& weather, std::vector<note_played>& notes_played);
 	void updateWeather(Weather& weather);
 	void updateScale();
 	std::vector<notes> getMode(Instrument&);
-	void play_notes(Instrument& instrument, Weather& weather, std::vector<std::string>& notes_played);
+	void play_notes(Instrument& instrument, Weather& weather, std::vector<note_played>& notes_played);
 	void initMusic();
 	void keyboard_listener();
 };

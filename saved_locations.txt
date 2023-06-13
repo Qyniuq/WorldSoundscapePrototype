@@ -19,3 +19,4 @@ Varāmīn/IR/Iran, Islamic Republic of/none/51.6457/35.3242
 Beaumont-sur-Lèze/FR/France/none/1.3583/43.381
 Şalākhid/SY/Syrian Arab Republic/none/36.5727/32.8727
 Hwangju-ŭp/KP/Korea, Democratic People's Republic of/none/125.776/38.6703
+Yebra/ES/Spain/none/-2.9663/40.357

@@ -2,6 +2,7 @@
 #include <iomanip>
 #include "ScaleLibrary.h"
 #include "CountryMap.h"
+#include "utilities.h"
 
 using namespace std::literals;
 
@@ -267,7 +268,7 @@ void Weather::display() {
     city_time = convertTimeToLocale(time(0));
     int length{ 70 };
     std::cout << "\n";
-    int space{ (length - (static_cast<int>(city_input.size()) + 2 + static_cast<int>(country_name.size()))) / 2 };
+    int space{ (length - (static_cast<int>(city_input.size() -dif(city_input)) + 2 + static_cast<int>(country_name.size() -dif (country_name)))) / 2 };
 
     std::cout << std::setprecision(9);
     std::cout << std::setw(space) << "" << city_input << " / " << country_name << "\n";
@@ -309,10 +310,12 @@ void Weather::display() {
     std::cout << std::setw(length - (14 + city_time.length())) << "" << "Current time: " << city_time << "\n";
     std::cout << std::setfill('-') << std::setw(length) << "" << std::setfill(' ') << "\n";
 
-    std::cout << "Open Weather calls: "  << std::setw(13) << open_weather_call_count << std::setw(20) << "[E] Enter Location" << "[S] Save Location" << std::endl;
-    std::cout << std::left << "Sunrise Sunset calls: " << std::setw(11) << sunrise_sunset_call_count << std::setw(20) << "[R] Random Location" << "[L] Load Location" << std::endl;
-    std::cout << std::left << "USNO calls: " << std::setw(21) << USNO_call_count << std::setw(20) << "[U] User Location" << "[P] Pause" << std::endl;
-    std::cout << std::left << "GeoPlugin calls: " << std::setw(16) << geoPLUGIN_call_count << std::setw(20) << "[M] Main Menu" << "[Q] Quit" << std::endl;
+    std::cout << "Open Weather calls: "  << std::setw(13) << open_weather_call_count << std::setw(20) << "[E] Enter Location" << "[S] Save Location\n";
+    std::cout << std::left << "Sunrise Sunset calls: " << std::setw(11) << sunrise_sunset_call_count << std::setw(20) << "[R] Random Location" << "[L] Load Location\n";
+    std::cout << std::left << "USNO calls: " << std::setw(21) << USNO_call_count << std::setw(20) << "[U] User Location" << "[P] Pause\n";
+    std::cout << std::left << "GeoPlugin calls: " << std::setw(16) << geoPLUGIN_call_count << std::setw(20) << "[M] Main Menu" << "[Q] Quit\n";
+
+    std::cout << "\n" << std::setw(length / 4) << "Instruments awake [ " << "\033[1;33m" << "Jaguar Guitar" << "\033[0m" << " / " << "\033[1;36m" << "Female Voice" << "\033[0m" << " ]\n";
 }
 
 void Weather::setCity(std::string city_input, std::string country_code_input) {

@@ -683,6 +683,14 @@ int getRoot(Weather &weather) {
 	}
 }
 
+std::vector<std::string>getAlterationsNames(std::vector<notes> vnotes) {
+	std::vector<std::string> sharp {"C#", "D#", "E#", "F#", "G#", "A#", "B#"};
+	std::vector<std::string> natural {"C", "D", "E", "F", "G", "A", "B"};
+	std::vector<std::string> flat {"Cb", "Db", "Eb", "Fb", "Gb", "Ab", "Bb"};
+	
+	return sharp;
+}
+
 std::vector <notes> setScaleForInstrument(const Instrument& instrument, Weather& weather) {
 
 	std::vector <notes> scale;

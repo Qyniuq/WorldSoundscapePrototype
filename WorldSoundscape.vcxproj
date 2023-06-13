@@ -154,6 +154,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ScaleLibrary.cpp" />
     <ClCompile Include="Sound.cpp" />
+    <ClCompile Include="utilities.cpp" />
     <ClCompile Include="Weather.cpp" />
     <ClCompile Include="WorldSoundscape.cpp" />
   </ItemGroup>
@@ -163,6 +164,7 @@
     <ClInclude Include="InstrumentInitializers.h" />
     <ClInclude Include="ScaleLibrary.h" />
     <ClInclude Include="Sound.h" />
+    <ClInclude Include="utilities.h" />
     <ClInclude Include="Weather.h" />
     <ClInclude Include="WorldSoundscape.h" />
   </ItemGroup>

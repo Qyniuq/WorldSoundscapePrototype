@@ -8,6 +8,7 @@
 #include <future>
 #include <thread>
 #include <iomanip>
+#include "utilities.h"
 #include "InstrumentInitializers.h"
 
 #define KEY_B 66
@@ -273,7 +274,7 @@ void WorldSoundscape::mainMenu() {
 			case KEY_Q:
 			case KEY_q:
 				system("cls");
-				std::cout << "Exiting programm..." << std::endl;
+				std::cout << "         Exiting programm..." << std::endl;
 				stop_flag = true;
 				cv.notify_all();
 				exit_World_Soundscape = true;
@@ -354,19 +355,6 @@ std::string reduceString(std::string s, int n) {
 	return result;
 }
 
-std::wstring reduceString(std::wstring s, int n) {
-	std::wstring result;
-	for (int i{ 0 }; i < n; ++i) {
-		result += s.at(i);
-	}
-	wchar_t point{ '.' };
-	int p{ 3 };
-	while (p--) {
-	result += point;
-	}
-	return result;
-}
-
 void WorldSoundscape::pauseMenu() {
 	update_mtx.lock();
 	std::cout << "\nPaused, press \"P\" to continue...";
@@ -375,15 +363,6 @@ void WorldSoundscape::pauseMenu() {
 		key = _getch();
 	}
 	update_mtx.unlock();
-}
-
-int dif(const std::string& s) {
-	size_t len{ 0 };
-	for (int i{ 0 }; i < s.size(); ++i) {
-		len += 1;
-		if ((s[i] == 'Ã' || s[i] == 'Å' || s[i] == '€' || s[i] == 'â' || s[i] == 'Ä') && i<15) len -= 1;
-	}
-	return s.size() - len;
 }
 
 void WorldSoundscape::favouriteLocationsMenu(){
@@ -396,11 +375,13 @@ void WorldSoundscape::favouriteLocationsMenu(){
 	bool out{false};
 	bool back{ false };
 
-	update_mtx.lock();
-	cv.notify_all();
+	display_shmtx.lock();
+	stop_display = true;
+	display_shmtx.unlock();
 
 	while (!out) {
-		margin = 4;
+		margin = 4;	
+		int max {15};
 		system("cls");
 		std::cout << std::endl;
 		std::cout << std::setw(margin + 3) << "" << std::setw(space) << "City" << std::setw(space) << "Country" << std::setw(space / 1.7) << "Longitude" << "Latitude\n\n";
@@ -409,24 +390,24 @@ void WorldSoundscape::favouriteLocationsMenu(){
 			std::cout << std::setw(margin) << "" << i + 1 << "[ ";
 			if (option == i) std::cout << "\033[1;30;47m";			
 			std::string city = Saved_Locations.at(i).city;
-			if ((city.size() - dif(city)) < 18) {
-				std::cout << std::setw(space + dif(city));
+			if ((city.size() - dif(city, max)) < 18) {
+				std::cout << std::setw(space + dif(city, max));
 				std::cout << city;
 			}
 			else { 
-				std::string result = reduceString(city, 15+dif(city));
-				std::cout << std::setw(space + dif(city));
+				std::string result = reduceString(city, max+dif(city, max));
+				std::cout << std::setw(space + dif(city, max));
 				std::cout << result; 
 			}
 			std::string country = Saved_Locations.at(i).country;
 
-			if ((country.size() - dif(country)) < 18) {
-				std::cout << std::setw(space + dif(country));
+			if ((country.size() - dif(country, max)) < 18) {
+				std::cout << std::setw(space + dif(country, max));
 				std::cout << country;
 			}
 			else { 
-				std::string result = reduceString(country, 15 + dif(country));
-				std::cout << std::setw(space + dif(country));
+				std::string result = reduceString(country, max + dif(country, max));
+				std::cout << std::setw(space + dif(country, max));
 				std::cout << result;
 			}
 			std::cout << std::setw(space / 1.7) << Saved_Locations.at(i).lon << std::setw(8) << Saved_Locations.at(i).lat;
@@ -442,7 +423,7 @@ void WorldSoundscape::favouriteLocationsMenu(){
 		}
 		std::cout << std::endl;
 		std::cout << std::setw(margin) << "" << std::setw(total_space-18) << "[D] Delete Location" << "[ENTER] Load Location" << std::endl;
-		std::cout << std::setw(margin) << "" << std::setw(total_space / 2) << "[B] Back" << std::endl;
+		std::cout << std::setw(margin) << "" << std::setw(total_space -14) << "[B] Back" << "[S] Save Changes" << std::endl;
 
 		key = _getch();
 		if (key == 0 || key == -32) {  // Arrow Keys first value
@@ -479,6 +460,10 @@ void WorldSoundscape::favouriteLocationsMenu(){
 				out = true;
 				back = true;
 				break;
+			case KEY_S:
+			case KEY_s:
+				saveChangesInSavedLocations();
+				break;
 			case KEY_D:
 			case KEY_d:
 				if (option >= Saved_Locations.size()) {
@@ -497,6 +482,8 @@ void WorldSoundscape::favouriteLocationsMenu(){
 	}
 
 	if (!back) {
+		update_mtx.lock();
+		cv.notify_all();
 		std::cout << std::endl << std::setw(27) << "" << "loading [...]" << std::endl;
 		weather.city_input = Saved_Locations.at(option).city;
 		weather.city = weather.city_input;
@@ -506,8 +493,9 @@ void WorldSoundscape::favouriteLocationsMenu(){
 		weather.user_location = false;
 		weather.callAllAPIs();
 		updateScale();
+		update_mtx.unlock();
 	}
-	update_mtx.unlock();
+	stop_display = false;
 }
 
 void WorldSoundscape::infoMenu(){
@@ -551,7 +539,7 @@ void WorldSoundscape::saveLocation(){
 }
 
 void WorldSoundscape::initMusic() {
-	std::vector<std::string > notes_played;
+	std::vector<note_played> notes_played;
 	std::jthread update_weather_thread(&WorldSoundscape::updateWeather, this, std::ref(weather));
 	std::jthread display_weather_thread(&WorldSoundscape::displayWeather, this, std::ref(weather), std::ref(notes_played));
 	std::jthread jaguar_guitar_thread(&WorldSoundscape::play_notes, this, std::ref(Jaguar), std::ref(weather), std::ref(notes_played));
@@ -625,7 +613,7 @@ void WorldSoundscape::setRandomLocation() {
 	else { std::cerr << "cities list wasn't ready for random location";}
 }
 
-void WorldSoundscape::displayWeather(Weather& weather, std::vector<std::string>& notes_played) {
+void WorldSoundscape::displayWeather(Weather& weather, std::vector<note_played>& notes_played) {
 	std::mutex mtx;
 	while (!stop_flag) {
 		std::unique_lock<std::mutex> lock(mtx);
@@ -633,7 +621,7 @@ void WorldSoundscape::displayWeather(Weather& weather, std::vector<std::string>&
 		while (std::chrono::steady_clock::now() < (last_display_time + 900ms) && !stop_flag) {
 			std::this_thread::sleep_for(10ms);
 		}		
-		if (!stop_flag) {
+		if (!stop_flag && !stop_display) {
 			display_shmtx.lock();
 			system("CLS");
 			weather.display();
@@ -647,8 +635,8 @@ void WorldSoundscape::displayWeather(Weather& weather, std::vector<std::string>&
 				std::cerr << "Exception in display weather thread.\n";
 				std::this_thread::sleep_for(3600s);
 			}
-			display_shmtx.unlock();
 			last_display_time = std::chrono::steady_clock::now();
+			display_shmtx.unlock();			
 		}		
 		update_lock.unlock();
 		cv.wait_for(lock, 100ms);
@@ -683,7 +671,7 @@ int rnd_gen(int min, int max){
 	return d(gen);
 }
 
-void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::vector<std::string>& notes_played) {
+void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::vector<note_played>& notes_played) {
 	srand(time(0));
 	std::vector<notes> mode = getMode(instrument);
 	//int r = rand() % mode.size();
@@ -712,13 +700,13 @@ void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::
 		//r = rand() % mode.size();
 		r = d(gen) % mode.size();
 		instrument.sounds[mode[r]].play();
-
 		std::shared_lock display_shlock(display_shmtx);
-		if (!stop_flag)
-		std::cout << instrument.sounds[mode[r]].sharp_name << " ";
+		if (!stop_flag)		
 		try {
 			push_back_mtx.lock();
-			notes_played.push_back(instrument.sounds[mode[r]].sharp_name);
+			note_played note(instrument.sounds[mode[r]].sharp_name, instrument.type);
+			if (!stop_display) std::cout << note << " ";
+			notes_played.emplace_back(note);
 			push_back_mtx.unlock();
 		} catch (...) { 
 			system("cls");
