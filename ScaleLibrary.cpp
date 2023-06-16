@@ -1,4 +1,6 @@
 #include "ScaleLibrary.h"
+#include "utilities.h"
+#include "NoteNames.h"
 
 //Major modes
 std::vector <intervals> ionian{ T, T, sT, T, T, T, sT };
@@ -75,8 +77,185 @@ std::vector <intervals> messiaen_seventh_mode{ sT, sT, sT, T, sT, sT, sT, sT, T,
 std::vector <intervals> augmented{ TsT, sT, TsT, sT, TsT, sT };
 std::vector <intervals> atonal{ sT, sT, sT, sT, sT, sT, sT, sT, sT, sT, sT, sT };
 
-std::vector <intervals> phrygian_major_sharp7{ sT, T, sT, T, sT, TsT, sT };
-std::vector <intervals> mixolydian_b2_b5{ sT, T, sT, sT, TsT, sT, T };
+std::vector <intervals> phrygian_major7{ sT, T, T, T, sT, TsT, sT };
+std::vector <intervals> mixolydian_b2_b5{ sT, TsT, sT, sT, TsT, sT, T };
+
+std::vector<std::vector<intervals>> getAll7thNoteScales() {
+	std::vector<std::vector<intervals>> all_scales;
+
+	// Major modes
+	all_scales.push_back(ionian);
+	all_scales.push_back(dorian);
+	all_scales.push_back(phrygian);
+	all_scales.push_back(lydian);
+	all_scales.push_back(mixolydian);
+	all_scales.push_back(aeolian);
+	all_scales.push_back(locrian);
+
+	// Melodic Minor modes
+	all_scales.push_back(melodic_minor);
+	all_scales.push_back(dorian_b2);
+	all_scales.push_back(lydian_augmented);
+	all_scales.push_back(lydian_dominant);
+	all_scales.push_back(mixolydian_b6);
+	all_scales.push_back(aeolian_b5);
+	all_scales.push_back(superlocrian);
+
+	// Harmonic Minor modes
+	all_scales.push_back(harmonic_minor);
+	all_scales.push_back(locrian_6);
+	all_scales.push_back(ionian_sharp5);
+	all_scales.push_back(dorian_sharp4);
+	all_scales.push_back(phrygian_major);
+	all_scales.push_back(lydian_sharp2);
+	all_scales.push_back(ultralocrian);
+
+	// Harmonic Major modes
+	all_scales.push_back(harmonic_major);
+	all_scales.push_back(dorian_b5);
+	all_scales.push_back(superphrygian);
+	all_scales.push_back(lydian_b3);
+	all_scales.push_back(mixolydian_b2);
+	all_scales.push_back(lydian_augmented_sharp2);
+	all_scales.push_back(locrian_bb7);
+
+	// Double Harmonic modes
+	all_scales.push_back(double_harmonic_major);
+	all_scales.push_back(lydian_sharp2_sharp6);
+	all_scales.push_back(phrygian_b4_bb7);
+	all_scales.push_back(double_harmonic_minor);
+	all_scales.push_back(mixolydian_b5_b9);
+	all_scales.push_back(ionian_augmented_sharp2);
+	all_scales.push_back(locrian_bb3_bb7);
+
+	// Hungarian Major modes
+	all_scales.push_back(lydian_dominant_sharp2);
+	all_scales.push_back(ultralocrian_bb6);
+	all_scales.push_back(harmonic_minor_b5);
+	all_scales.push_back(superlocrian_6);
+	all_scales.push_back(melodic_minor_sharp5);
+	all_scales.push_back(phrygian_sharp4_6);
+	all_scales.push_back(lydian_augmented_sharp3);
+
+	// Romanian Major modes
+	all_scales.push_back(romanian_major);
+	all_scales.push_back(super_lydian_augmented_6);
+	all_scales.push_back(locrian_9_bb7);
+	all_scales.push_back(superlocrian_bb6);
+	all_scales.push_back(melodic_minor_b5);
+	all_scales.push_back(superphrygian_6);
+	all_scales.push_back(lydian_augmented_b3);
+
+	all_scales.push_back(phrygian_major7);
+	all_scales.push_back(mixolydian_b2_b5);
+
+	return all_scales;
+}
+
+std::vector<std::string> getAll7thNoteScaleNames() {
+	std::vector<std::string> scale_names;
+
+	// Major modes
+	scale_names.push_back("Ionian");
+	scale_names.push_back("Dorian");
+	scale_names.push_back("Phrygian");
+	scale_names.push_back("Lydian");
+	scale_names.push_back("Mixolydian");
+	scale_names.push_back("Aeolian");
+	scale_names.push_back("Locrian");
+
+	// Melodic Minor modes
+	scale_names.push_back("Melodic Minor");
+	scale_names.push_back("Dorian b2");
+	scale_names.push_back("Lydian #5");
+	scale_names.push_back("Lydian Dominant");
+	scale_names.push_back("Mixolydian b6");
+	scale_names.push_back("Aeolian b5");
+	scale_names.push_back("Super Locrian");
+
+	// Harmonic Minor modes
+	scale_names.push_back("Harmonic Minor");
+	scale_names.push_back("Locrian 6");
+	scale_names.push_back("Ionian #5");
+	scale_names.push_back("Dorian #4");
+	scale_names.push_back("Phrygian Major");
+	scale_names.push_back("Lydian #2");
+	scale_names.push_back("Ultra Locrian");
+
+	// Harmonic Major modes
+	scale_names.push_back("Harmonic Major");
+	scale_names.push_back("Dorian b5");
+	scale_names.push_back("Super Phrygian");
+	scale_names.push_back("Lydian b3");
+	scale_names.push_back("Mixolydian b2");
+	scale_names.push_back("Lydian Augmented #2");
+	scale_names.push_back("Locrian bb7");
+
+	// Double Harmonic modes
+	scale_names.push_back("Double Harmonic Major");
+	scale_names.push_back("Lydian #2 #6");
+	scale_names.push_back("Phrygian b4 bb7");
+	scale_names.push_back("Double Harmonic Minor");
+	scale_names.push_back("Mixolydian b5 b9");
+	scale_names.push_back("Ionian Augmented #2");
+	scale_names.push_back("Locrian bb3 bb7");
+
+	// Hungarian Major modes
+	scale_names.push_back("Lydian Dominant #2");
+	scale_names.push_back("Ultra Locrian bb6");
+	scale_names.push_back("Harmonic Minor b5");
+	scale_names.push_back("Super Locrian 6");
+	scale_names.push_back("Melodic Minor #5");
+	scale_names.push_back("Phrygian #4 6");
+	scale_names.push_back("Lydian Augmented #3");
+
+	// Romanian Major modes
+	scale_names.push_back("Romanian Major");
+	scale_names.push_back("Super Lydian Augmented 6");
+	scale_names.push_back("Locrian 9 bb7");
+	scale_names.push_back("Super Locrian bb6");
+	scale_names.push_back("Melodic Minor b5");
+	scale_names.push_back("Super Phrygian 6");
+	scale_names.push_back("Lydian Augmented b3");
+
+	scale_names.push_back("Phrygian 7");
+	scale_names.push_back("Mixolydian b2 b5");
+
+	return scale_names;
+}
+
+std::vector<std::vector<intervals>> getAllRareScales() {
+	std::vector<std::vector<intervals>> rare_scales {
+		{ T, T, T, T, T, T },                    // whole_tone
+		{ T, sT, T, sT, T, sT, T, sT },          // diminished_T_sT
+		{ sT, T, sT, T, sT, T, sT, T },          // diminished_sT_T
+		{ T, sT, sT, T, sT, sT, T, sT, sT },     // messiaen_third_mode
+		{ sT, sT, TsT, sT, sT, sT, TsT, sT },    // messiaen_fourth_mode
+		{ sT, TT, sT, sT, TT, sT },              // messiaen_fifth_mode
+		{ T, T, sT, sT, T, T, sT, sT },          // messiaen_sixth_mode
+		{ sT, sT, sT, T, sT, sT, sT, sT, T, sT }, // messiaen_seventh_mode
+		{ TsT, sT, TsT, sT, TsT, sT },           // augmented
+		{ sT, sT, sT, sT, sT, sT, sT, sT, sT, sT, sT, sT } // atonal
+	};
+
+	return rare_scales;
+}
+
+std::vector<std::string> getAllRareScaleNames() {
+	std::vector<std::string> rareScaleNames {
+		"Whole Tone",
+			"Diminished T sT",
+			"Diminished sT T",
+			"Messiaen Third Mode",
+			"Messiaen Fourth Mode",
+			"Messiaen Fifth Mode",
+			"Messiaen Sixth Mode",
+			"Messiaen Seventh Mode",
+			"Augmented",
+			"Atonal"
+	};
+	return rareScaleNames;
+}
 
 int getWeatherPoints(const Weather& weather);
 
@@ -221,8 +400,8 @@ Scale getScaleForNauticalDawn(const int& points) {
 	}
 
 	else if (points == -7) {
-		result.matrix = phrygian_major_sharp7;
-		result.name = "Phrygian Major #7";
+		result.matrix = phrygian_major7;
+		result.name = "Phrygian #7";
 	}
 
 	else if (points <= -8) {
@@ -580,12 +759,6 @@ int getWeatherPoints(const Weather& weather) {
 	return points;
 }
 
-int getNumberInRange(int min, int max, int number) {
-	int range = max - min + 1;
-	int result = ((number - min) % range + range) % range + min;
-	return result;
-}
-
 std::string noteNumberToString(int Note) {
 	std::string result;
 
@@ -691,14 +864,31 @@ std::vector<std::string>getAlterationsNames(std::vector<notes> vnotes) {
 	return sharp;
 }
 
-std::vector <notes> setScaleForInstrument(const Instrument& instrument, Weather& weather) {
+Scale getGeneralScale(Weather& weather, bool flat_preference, bool enharmonics, bool double_alterations, bool enharmonics_tonics) {
+	Scale result = getScaleMatrix(weather);
+	weather.scale = result.name;
+	result.root = getNumberInRange(0, 11, getRoot(weather));
+	std::vector<int> scale {result.root};
+
+	for (int i{ 0 }; i < result.matrix.size() - 1; ++i) {
+		scale.push_back(scale.at(i) + result.matrix.at(i));
+	}
+	std::vector<std::string> names = getScaleNoteNames(scale, flat_preference, enharmonics, double_alterations, enharmonics_tonics);
+	int i{ 0 };
+	for (auto &n : scale) {
+		n = getNumberInRange(0, 11, n);
+		result.note_names[n] = names.at(i);
+		++i;
+	}
+	weather.tonality = names.at(0);
+	weather.scale_note_names = names;
+	return result;
+}
+
+std::vector <notes> setScaleForInstrument(const Instrument& instrument, Scale s) {
 
 	std::vector <notes> scale;
-	Scale s = getScaleMatrix(weather);
-	weather.scale = s.name;
-	int root = getRoot(weather);
-	weather.tonality = noteNumberToString(root);
-
+	int root = s.root;
 	int note = getNumberInRange(instrument.min, instrument.min + 11, root);
 
 	for (int i{ 0 }; note <= instrument.max; ++i) {

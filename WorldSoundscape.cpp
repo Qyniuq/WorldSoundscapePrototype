@@ -8,6 +8,7 @@
 #include <future>
 #include <thread>
 #include <iomanip>
+#include "ScaleLibrary.h"
 #include "utilities.h"
 #include "InstrumentInitializers.h"
 
@@ -704,7 +705,7 @@ void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::
 		if (!stop_flag)		
 		try {
 			push_back_mtx.lock();
-			note_played note(instrument.sounds[mode[r]].sharp_name, instrument.type);
+			note_played note(generalScale.note_names[getNumberInRange(0, 11, static_cast<int>(mode[r]))], instrument.type);
 			if (!stop_display) std::cout << note << " ";
 			notes_played.emplace_back(note);
 			push_back_mtx.unlock();
@@ -788,8 +789,9 @@ void WorldSoundscape::keyboard_listener() {
 }
 
 void WorldSoundscape::updateScale(){
-	guitar_mode = setScaleForInstrument(Jaguar, weather);
-	female_voice_mode = setScaleForInstrument(FemaleVoice, weather);
+	generalScale = getGeneralScale(weather, flat_preference, enharmonics, double_alterations, enharmonics_tonics);
+	guitar_mode = setScaleForInstrument(Jaguar, generalScale);
+	female_voice_mode = setScaleForInstrument(FemaleVoice, generalScale);
 }
 
 std::vector<notes> WorldSoundscape::getMode(Instrument& i){

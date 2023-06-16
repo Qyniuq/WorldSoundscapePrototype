@@ -96,15 +96,24 @@ private:
 	std::vector<notes> guitar_mode;
 	std::vector<notes> female_voice_mode;
 	std::vector<Location> Saved_Locations;
+	Scale generalScale;
 
 public:
 	Weather weather;
 	bool stop_display{ false };
 	bool startMusic{false};
 	bool exit_World_Soundscape{false};
+
 	bool saved_locations_has_been_changed{false};
+
+	bool flat_preference = false;
+	bool enharmonics_tonics = false;
+	bool double_alterations = false;
+	bool enharmonics = false;
+
 	WorldSoundscape();
 	~WorldSoundscape();
+
 	void setRandomLocation();
 	void enterLocationMenu();
 	void setUserlocation();

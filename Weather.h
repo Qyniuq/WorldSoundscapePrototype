@@ -62,6 +62,7 @@ public:
     enum class DaylightStatus { Night = 0, Astronomical_Dawn, Nautical_Dawn, Civil_Dawn, Morning = 4, Afternoon, Civil_Dusk, Nautical_Dusk, Astronomical_Dusk };
     std::string scale;
     std::string tonality;
+    std::vector<std::string> scale_note_names;
     int points;
 
     std::string city_input;

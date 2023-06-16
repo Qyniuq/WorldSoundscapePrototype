@@ -299,7 +299,8 @@ void Weather::display() {
     std::cout << "Astronomical dusk ends at: " << astronomical_dusk.local_str << "\n";
     std::cout << "Moon phase: " << moon_phase; if (moon_fracillum != "none") std::cout << " " << moon_fracillum << "\n";
     std::cout << "Latitude: " << lat << " / " << "Longitude: " << lon << "\n";
-    std::cout << "Points: " << points << "\nScale: " << tonality << " " << scale << "\n";
+    std::cout << "Points: " << points << "\nScale: " << tonality << " " << scale << " / ";
+    for (auto n : scale_note_names) { std::cout << n << " "; } std::cout << std::endl;
 
     if (No_Conexion) std::cout << "\033[1;31m" << "Error: couldn't establish connection\n" << "\033[0m";
     if (No_ApiCode) std::cout << "\033[1;31m" << "Error: couldn't find apicode.txt\n" <<"\033[0m";

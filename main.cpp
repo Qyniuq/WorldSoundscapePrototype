@@ -14,6 +14,7 @@
 std::atomic<bool> stop_flag{ false };
 
 int main() {
+
 	WorldSoundscape MyApp;
 	while (!MyApp.exit_World_Soundscape) {
 	while (!MyApp.startMusic && !MyApp.exit_World_Soundscape) {

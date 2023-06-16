@@ -17,3 +17,9 @@ int dif(const std::string& s) {
 	}
 	return s.size() - len;
 }
+
+int getNumberInRange(int min, int max, int number) {
+	int range = max - min + 1;
+	int result = ((number - min) % range + range) % range + min;
+	return result;
+}

@@ -152,6 +152,7 @@
     <ClCompile Include="Instrument.cpp" />
     <ClCompile Include="InstrumentInitializers.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="NoteNames.cpp" />
     <ClCompile Include="ScaleLibrary.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="utilities.cpp" />
@@ -162,6 +163,7 @@
     <ClInclude Include="CountryMap.h" />
     <ClInclude Include="Instrument.h" />
     <ClInclude Include="InstrumentInitializers.h" />
+    <ClInclude Include="NoteNames.h" />
     <ClInclude Include="ScaleLibrary.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="utilities.h" />
