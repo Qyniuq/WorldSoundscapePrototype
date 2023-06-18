@@ -2,6 +2,7 @@
 #include "utilities.h"
 #include "NoteNames.h"
 
+
 //Major modes
 std::vector <intervals> ionian{ T, T, sT, T, T, T, sT };
 std::vector <intervals> dorian{ T, sT, T, T, T, sT, T };

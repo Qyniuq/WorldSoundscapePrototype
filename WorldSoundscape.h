@@ -122,9 +122,12 @@ public:
 	void pauseMenu();
 	void favouriteLocationsMenu();
 	void infoMenu();
+	void optionsMenu();
 	void saveLocation();
 	void loadSavedLocations();
 	void saveChangesInSavedLocations();
+	void loadUserSettings();
+	void saveUserSettings();
 	void displayWeather(Weather& weather, std::vector<note_played>& notes_played);
 	void updateWeather(Weather& weather);
 	void updateScale();

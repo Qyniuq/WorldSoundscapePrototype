@@ -1,12 +1,18 @@
 #include "Instrument.h"
 
 
+
 Instrument::Instrument(std::string folder_dir, int min, int max, std::vector<int> oct, int sleep_val, const instrument_type &ins_type, const ALuint& effectSlot)
     : folder_direction{ folder_dir }, min{ min }, max{ max }, octaves{ oct }, type{ ins_type }, sleep_value{ sleep_val }, effectSlot{ effectSlot }
 {
     //std::cout << "Instrument " << folder_direction << " with " << min << " lowest note, " << max << " highest note and octaves ";
     //for (int oct : octaves) { std::cout << oct << ", "; } std::cout << " has been created.\n";
     sounds = LoadSounds();
+}
+
+void Instrument::Play(int n)
+{
+    sounds[n].play();
 }
 
 std::map<int, Sound> Instrument::LoadSounds() {

@@ -306,15 +306,16 @@ void Weather::display() {
     if (No_ApiCode) std::cout << "\033[1;31m" << "Error: couldn't find apicode.txt\n" <<"\033[0m";
     if (No_Saved_Locations) std::cout << "\033[1;31m" << "Error: couldn't find saved_locations.txt\n"<<"\033[0m";
     if (No_Location_Found) std::cout << "\033[1;31m" << "Error: location not found, try another one\n" << "\033[0m";
+    if (No_User_Settings) std::cout << "\033[1;31m" << "Error: couldn't find user_settings.txt\n" << "\033[0m";
 
     std::cout << std::right << std::setw(length) << day_light_status << std::left << "\n";
     std::cout << std::setw(length - (14 + city_time.length())) << "" << "Current time: " << city_time << "\n";
     std::cout << std::setfill('-') << std::setw(length) << "" << std::setfill(' ') << "\n";
 
-    std::cout << "Open Weather calls: "  << std::setw(13) << open_weather_call_count << std::setw(20) << "[E] Enter Location" << "[S] Save Location\n";
-    std::cout << std::left << "Sunrise Sunset calls: " << std::setw(11) << sunrise_sunset_call_count << std::setw(20) << "[R] Random Location" << "[L] Load Location\n";
-    std::cout << std::left << "USNO calls: " << std::setw(21) << USNO_call_count << std::setw(20) << "[U] User Location" << "[P] Pause\n";
-    std::cout << std::left << "GeoPlugin calls: " << std::setw(16) << geoPLUGIN_call_count << std::setw(20) << "[M] Main Menu" << "[Q] Quit\n";
+    std::cout << "Weather calls: "  << std::setw(7) << open_weather_call_count << std::setw(20) << "[E] Enter Location" << std::setw(20) << "[S] Save Location" << "[Q] Quit\n";
+    std::cout << std::left << "Sunrise calls: " << std::setw(7) << sunrise_sunset_call_count << std::setw(20) << "[R] Random Location" << "[L] Load Location\n";
+    std::cout << std::left << "USNO calls: " << std::setw(10) << USNO_call_count << std::setw(20) << "[U] User Location" << "[P] Pause\n";
+    std::cout << std::left << "GPS calls: " << std::setw(11) << geoPLUGIN_call_count << std::setw(20) << "[M] Main Menu" << "[O] Options\n";
 
     std::cout << "\n" << std::setw(length / 4) << "Instruments awake [ " << "\033[1;33m" << "Jaguar Guitar" << "\033[0m" << " / " << "\033[1;36m" << "Female Voice" << "\033[0m" << " ]\n";
 }

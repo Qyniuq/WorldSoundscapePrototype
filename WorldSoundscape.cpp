@@ -28,6 +28,8 @@
 #define KEY_m 109
 #define KEY_N 78
 #define KEY_n 110
+#define KEY_O 79
+#define KEY_o 111
 #define KEY_P 80
 #define KEY_p 112
 #define KEY_Q 81
@@ -40,6 +42,7 @@
 #define KEY_u 117
 #define KEY_Y 89
 #define KEY_y 121
+#define KEY_ENTER 13
 
 using namespace std::literals;
 auto last_update_time = std::chrono::steady_clock::now();
@@ -75,12 +78,12 @@ WorldSoundscape::WorldSoundscape() : weather{ false, "none", "none", "none" } {
 	alAuxiliaryEffectSloti(reverbEffectSlot, AL_EFFECTSLOT_EFFECT, reverbEffect);
 	system("chcp 65001");
 	system("cls");
-	loadSavedLocations();
 	std::thread loadCitiesThread([this]() { weather.loadCitiesList(); });
 	loadCitiesThread.detach();
 	std::future<Instrument> jaguar_f = std::async(std::launch::async, CreateJaguarGuitar, reverbEffectSlot);
 	std::future<Instrument> female_f = std::async(std::launch::async, CreateFemaleVoice, reverbEffectSlot);
-
+	loadSavedLocations();
+	loadUserSettings();
 	Jaguar = jaguar_f.get();
 	FemaleVoice = female_f.get();
 }
@@ -169,6 +172,51 @@ void WorldSoundscape::saveChangesInSavedLocations() {
 	}
 }
 
+void WorldSoundscape::loadUserSettings()
+{
+	std::ifstream file("user_settings.txt");
+	if (!file) {
+		std::cerr << "saved_locations.txt not found";
+		weather.No_User_Settings = true;
+	}
+	else {
+		weather.No_User_Settings = false;
+		std::string line;
+		std::string setting;
+		while (std::getline(file, line)) {
+			auto it = std::find(line.begin(), line.end(), '/');
+			std::string setting(line.begin(), it);
+			++it;
+			if (setting == "flat_preference")
+				flat_preference = *it - '0';
+			else if (setting == "enharmonics") {
+				enharmonics = *it - '0';
+				enharmonics_tonics = *it - '0';
+			}
+			else if (setting == "double_alterations")
+				double_alterations = *it - '0';
+		}
+	}
+}
+
+void WorldSoundscape::saveUserSettings()
+{
+	std::ofstream file("user_settings.txt");
+	if (!file.is_open()) {
+		std::cerr << "saved_locations.txt not found";
+		weather.No_User_Settings = true;
+	}
+	else {
+		weather.No_User_Settings = false;
+
+		file << "flat_preference/" << flat_preference << std::endl;
+		file << "enharmonics/" << enharmonics << std::endl;
+		file << "double_alterations/" << double_alterations << std::endl;
+
+		file.close();
+	}
+}
+
 void WorldSoundscape::waitForCitiesListLoading() {
 
 	if (weather.cities.IsNull()) {
@@ -200,7 +248,8 @@ void WorldSoundscape::mainMenu() {
 			"           [U] "; if (option == 2) std::cout << "\033[1;30;47m"; std::cout << "User Location\n" << "\033[0m" <<
 			"           [S] "; if (option == 3) std::cout << "\033[1;30;47m"; std::cout << "Saved Locations\n" << "\033[0m" <<
 			"           [I] "; if (option == 4) std::cout << "\033[1;30;47m"; std::cout << "Info\n" << "\033[0m" <<
-			"           [Q] "; if (option == 5) std::cout << "\033[1;30;47m"; std::cout << "Quit\n" << "\033[0m";
+			"           [O] "; if (option == 5) std::cout << "\033[1;30;47m"; std::cout << "Options\n" << "\033[0m" <<
+			"           [Q] "; if (option == 6) std::cout << "\033[1;30;47m"; std::cout << "Quit\n" << "\033[0m";
 		
 		std::cout << std::endl;
 		if (weather.No_Conexion) std::cout << std::setw(space) << "" << "\033[1;31m" << "Error: couldn't establish connection\n" << "\033[0m";
@@ -214,11 +263,11 @@ void WorldSoundscape::mainMenu() {
 			switch (key) {
 			case 80:
 				option += 1;
-				option = option > 5 ? 0 : option;
+				option = option > 6 ? 0 : option;
 				break;
 			case 72:
 				option -= 1;
-				option = option < 0 ? 5 : option;
+				option = option < 0 ? 6 : option;
 				break;
 			default:
 				break;
@@ -265,9 +314,14 @@ void WorldSoundscape::mainMenu() {
 
 			case KEY_I:
 			case KEY_i:
-				system("cls");
-				std::cout << "\n";
 				infoMenu();
+				startMusic = false;
+				out_of_loop = true;
+				break;
+
+			case KEY_O:
+			case KEY_o:
+				optionsMenu();
 				startMusic = false;
 				out_of_loop = true;
 				break;
@@ -324,16 +378,19 @@ void WorldSoundscape::mainMenu() {
 			break;
 
 		case 4:
-			system("cls");
-			std::cout << "\n";
 			infoMenu();
 			startMusic = false;
 			out_of_loop = true;
 			break;
 
 		case 5:
+			optionsMenu();
+			out_of_loop = true;
+			break;
+
+		case 6:
 			system("cls");
-			std::cout << "Exiting programm..." << std::endl;
+			std::cout << "         Exiting programm..." << std::endl;
 			stop_flag = true;
 			cv.notify_all();
 			exit_World_Soundscape = true;
@@ -358,7 +415,7 @@ std::string reduceString(std::string s, int n) {
 
 void WorldSoundscape::pauseMenu() {
 	update_mtx.lock();
-	std::cout << "\nPaused, press \"P\" to continue...";
+	std::cout << "\n\nPaused, press \"P\" to continue...";
 	char key = ' ';
 	while (key != KEY_P && key != KEY_p) {
 		key = _getch();
@@ -443,13 +500,13 @@ void WorldSoundscape::favouriteLocationsMenu(){
 				break;
 			}
 		}
-		else if (key == 13 && option >= Saved_Locations.size()) {
+		else if (key == KEY_ENTER && option >= Saved_Locations.size()) {
 			std::cout << "\033[1;31m \n";
 			std::cout << "   ERROR: empty block";
 			std::cout << "\033[0m";
 			std::this_thread::sleep_for(400ms);
 		}
-		else if (key == 13) {
+		else if (key == KEY_ENTER) {
 			out = true;
 			startMusic = true;
 			stop_flag = false;
@@ -502,7 +559,9 @@ void WorldSoundscape::favouriteLocationsMenu(){
 void WorldSoundscape::infoMenu(){
 	int margin(8);
 	int space(56);
-	std::cout << "\n\n";
+
+	system("cls");
+	std::cout << "\n\n\n";
 	//std::cout << std::setfill(' ') << std::setw(margin) << "" << std::setfill('-') << std::setw(space) << "" << std::endl;
 	std::cout << std::setfill(' ') << std::setw(margin) << "" << "World Sound is a procedural and musical application \n"; 
 	std::cout << std::setw(margin) << "" << "developed by Jorge Manzano, with the precious help of\n";
@@ -523,6 +582,103 @@ void WorldSoundscape::infoMenu(){
 	while (key != KEY_B && key != KEY_b) {
 		key = _getch();
 	}
+}
+
+void WorldSoundscape::optionsMenu() {
+	int margin(7);
+	int space(30);
+	int option{0};
+	char key = ' ';
+	bool out_of_the_loop{false};
+	display_shmtx.lock();
+	stop_display = true;
+	display_shmtx.unlock();
+
+	bool prev_enharmonics = enharmonics;
+	bool prev_double_alterations = double_alterations;
+	bool prev_flat_preference = flat_preference;
+
+	while (!out_of_the_loop) {
+		system("cls");
+		std::string double_alterations_state = double_alterations == true ? "enabled" : "disabled";
+		std::string enharmonics_state = enharmonics && enharmonics_tonics ? "enabled" : "disabled";
+		std::string accidentals_preference_state = flat_preference ? "b" : "#";		
+		std::string underlined0 = option == 0 ? "\033[1;30;47m" : "";
+		std::string underlined1 = option == 1 ? "\033[1;30;47m" : "";
+		std::string underlined2 = option == 2 ? "\033[1;30;47m" : "";
+
+		std::cout << std::endl << std::left << "\tOptions:\n\n";
+		std::cout << underlined0 << "\taccidental preference" << std::setw(space-10) << "\033[0m" << accidentals_preference_state << std::endl;
+		std::cout << underlined1 << "\tenharmonics" << std::setw(space) << "\033[0m" << enharmonics_state << std::endl;
+		std::cout << underlined2 << "\tdouble alterations" << std::setw(space-7) << "\033[0m"<< double_alterations_state << std::endl;
+
+		switch (option) {
+		case 0:
+			std::cout << "\n\tAccidentals \"b\" and \"#\" will be used according\n\tto the user's preference when either option\n\tprovides the same number of alterations in a scale.";
+			break;
+		case 1:
+			std::cout << "\n\tWhen enabled, the enharmonics E#, B#, Cb, Fb will\n\tappear in some scales to avoid repeated notes.\n";
+			break;
+		case 2:
+			std::cout << "\n\tWhen enabled, double alterations (\"bb\" and \"##\")\n\tmight appear in some cases avoid repeated notes\n\tin certain scales.";
+			break;
+		}
+
+
+		std::cout << "\n\n\t[B] Back";
+		key = _getch();
+		if (key == 0 || key == -32) {  // Arrow Keys first value
+			key = _getch();
+			switch (key) {
+			case 80:
+				option += 1;
+				option = option > 2 ? 0 : option;
+				break;
+			case 72:
+				option -= 1;
+				option = option < 0 ? 2 : option;
+				break;
+			case 77:
+			case 75:
+				switch (option) {
+				case 0:
+					if (flat_preference) flat_preference = false;
+					else flat_preference = true;
+					break;
+				case 1:
+					if (enharmonics && enharmonics_tonics) {
+						enharmonics = false; enharmonics_tonics = false;
+					}
+					else enharmonics = true; enharmonics_tonics = true;
+					break;
+				case 2:
+					if (double_alterations) double_alterations = false;
+					else double_alterations = true;
+					break;
+				default:
+					break;
+				}
+			default:
+				break;
+			}
+		}
+		else {
+			switch (key) {
+			case KEY_B:
+			case KEY_b:
+				saveUserSettings();
+				out_of_the_loop = true;
+				break;
+			}
+		}
+	}
+	if (enharmonics != prev_enharmonics || flat_preference != prev_flat_preference || double_alterations != prev_double_alterations) {
+		update_mtx.lock();
+		updateScale();
+		update_mtx.unlock();
+	}
+
+	stop_display = false;
 }
 
 void WorldSoundscape::saveLocation(){
@@ -626,16 +782,9 @@ void WorldSoundscape::displayWeather(Weather& weather, std::vector<note_played>&
 			display_shmtx.lock();
 			system("CLS");
 			weather.display();
-			std::cout << "\n";
-			try {
-				for (auto& n : notes_played)
-					std::cout << n << " ";
-			}
-			catch (...) {
-				system("cls");
-				std::cerr << "Exception in display weather thread.\n";
-				std::this_thread::sleep_for(3600s);
-			}
+			std::cout << "\n";		
+			for (auto& n : notes_played)
+				std::cout << n << " ";
 			last_display_time = std::chrono::steady_clock::now();
 			display_shmtx.unlock();			
 		}		
@@ -654,10 +803,8 @@ void WorldSoundscape::updateWeather(Weather& weather) {
 		}	
 		if (!stop_flag) {	
 			std::shared_lock up_lock(update_mtx);
-			//std::cout << "[Update start] ";
 			weather.callAllAPIs();
 			updateScale();
-			//std::cout << "[Update finish] ";
 			up_lock.unlock();
 			last_update_time = std::chrono::steady_clock::now();			
 		}		
@@ -675,7 +822,6 @@ int rnd_gen(int min, int max){
 void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::vector<note_played>& notes_played) {
 	srand(time(0));
 	std::vector<notes> mode = getMode(instrument);
-	//int r = rand() % mode.size();
 	std::random_device rd;
 	std::mt19937 gen {rd()};
 	std::uniform_int_distribution d(0, 10000);
@@ -686,45 +832,31 @@ void WorldSoundscape::play_notes(Instrument& instrument, Weather& weather, std::
 		std::unique_lock<std::mutex> lock(mtx);
 		
 		if (notes_played.size() >= 20){			
-			try {
 				display_shmtx.lock();
 				notes_played.clear();
-				display_shmtx.unlock();
-			}
-			catch (...) { 
-				std::cerr << "exception in clear vector.\n";
-				std::this_thread::sleep_for(3600s);
-			}			
+				display_shmtx.unlock();		
 		}		
 		std::shared_lock update_lock(update_mtx);
 		mode = getMode(instrument);
-		//r = rand() % mode.size();
 		r = d(gen) % mode.size();
-		instrument.sounds[mode[r]].play();
+		int note = mode[r];
+		instrument.Play(note);
 		std::shared_lock display_shlock(display_shmtx);
-		if (!stop_flag)		
-		try {
+		if (!stop_flag) {
 			push_back_mtx.lock();
 			note_played note(generalScale.note_names[getNumberInRange(0, 11, static_cast<int>(mode[r]))], instrument.type);
 			if (!stop_display) std::cout << note << " ";
 			notes_played.emplace_back(note);
 			push_back_mtx.unlock();
-		} catch (...) { 
-			system("cls");
-			std::cerr << "exception in play notes thread.\n";
-			std::this_thread::sleep_for(3600s);
 		}
 		display_shlock.unlock();
 		update_lock.unlock();
 		
-
 		int sleep_time;
 		if (weather.wind_speed != 0) {
-			//sleep_time = static_cast<int>((rand() % instrument.sleep_value) / (weather.wind_speed / 1.7));
 			sleep_time = static_cast<int>((d(gen) % instrument.sleep_value) / (weather.wind_speed / 1.7));
 		}
 		else {
-			//sleep_time = static_cast<int>((rand() % instrument.sleep_value) + 1000);
 			sleep_time = static_cast<int>((d(gen) % instrument.sleep_value) + 1000);
 		}
 		cv.wait_for(lock, std::chrono::milliseconds(sleep_time));
@@ -769,6 +901,10 @@ void WorldSoundscape::keyboard_listener() {
 		case KEY_P:
 		case KEY_p:
 			pauseMenu();
+			break;
+		case KEY_O:
+		case KEY_o:
+			optionsMenu();
 			break;
 		case KEY_Q:
 		case KEY_q:

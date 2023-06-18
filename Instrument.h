@@ -24,5 +24,6 @@ public:
 	Instrument() = default;
 	Instrument(std::string folder_dir, int min, int max, std::vector<int> oct, int sleep_val, const instrument_type&, const ALuint& effectSlot);
 
+	void Play(int n);
 	std::map<int, Sound> LoadSounds();
 };

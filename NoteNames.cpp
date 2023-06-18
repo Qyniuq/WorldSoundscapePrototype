@@ -202,7 +202,7 @@ std::vector<std::string> getAlterationsFor7thNoteScale(std::vector<int> scale, b
     return result;
 }
 
-std::vector<std::string> getAlterationsForRareScale(std::vector<int>scale) {
+std::vector<std::string> getAlterationsForRareScale(std::vector<int>scale, bool flat_preference) {
 
     std::multiset<int> natural_notes {-1, 0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21};
     std::vector<int> final_natural;
@@ -219,7 +219,9 @@ std::vector<std::string> getAlterationsForRareScale(std::vector<int>scale) {
         auto previous_natural_note = std::lower_bound(natural_notes.begin(), natural_notes.end(), scale_note);
         --previous_natural_note;
         auto next_nearest_natural_note = std::lower_bound(natural_notes.begin(), natural_notes.end(), (getNumberInRange(0, 11, scale.at(i + 1))));
-        if (final_natural.size() != 0 && isAltered(scale_note) && (scale_note - *previous_natural_note) == 1 && final_natural.back() != *previous_natural_note && scale_note != getNumberInRange(0, 11, (scale.at(0) + 10))) {
+        if (scale.size() == 13 && flat_preference)
+            final_natural.push_back(*nearest_natural_note);
+        else if (final_natural.size() != 0 && isAltered(scale_note) && (scale_note - *previous_natural_note) == 1 && final_natural.back() != *previous_natural_note && scale_note != getNumberInRange(0, 11, (scale.at(0) + 10))) {
             final_natural.push_back(*--nearest_natural_note);
         }
         else if (*next_nearest_natural_note == *nearest_natural_note || ((scale_note == 1 || scale_note == 6 || scale_note == 8) && minor3rd_found && i == 0)) {
@@ -260,7 +262,7 @@ std::vector<std::string> getScaleNoteNames(std::vector<int> scale, bool flat_pre
     if (scale.size() == 7)
         result = getAlterationsFor7thNoteScale(scale, flat_preference, enharmonics, double_alterations, enharmonics_tonics);
     else
-        result = getAlterationsForRareScale(scale);
+        result = getAlterationsForRareScale(scale, flat_preference);
 
     return result;
 }
